@@ -1,2 +1,2 @@
 # sashakt-bank-management-system
-“A web-based banking application (ongoing project)”
+Full stack banking web app with AI chatbot, 3 portals, Python Flask and MySQL
