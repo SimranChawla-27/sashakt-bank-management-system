@@ -8,6 +8,7 @@ import bcrypt
 import random
 import string
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from datetime import datetime
 load_dotenv()
 
 app = Flask(__name__)
@@ -237,6 +238,33 @@ def register():
         return render_template('register.html', success=f'Account created successfully! Your account number is {account_number}. Please login.')
 
     return render_template('register.html')
+from datetime import datetime
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+    accounts = Account.query.filter_by(user_id=user.id).all()
+
+    recent_transactions = Transaction.query.filter(
+        (Transaction.from_account == accounts[0].account_number) |
+        (Transaction.to_account == accounts[0].account_number)
+    ).order_by(Transaction.created_at.desc()).limit(5).all()
+
+    return render_template('dashboard.html',
+        user_name=user.full_name,
+        user_email=user.email,
+        accounts=accounts,
+        recent_transactions=recent_transactions,
+        current_date=datetime.now().strftime('%A, %d %B %Y')
+    )
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -258,9 +286,10 @@ def login():
         session['user_name'] = user.full_name
         session['user_email'] = user.email
 
-        return redirect(url_for('home'))
+        return redirect(url_for('dashboard'))
 
     return render_template('login.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=3000)

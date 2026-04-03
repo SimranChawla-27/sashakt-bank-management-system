@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item active">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" class="nav-item logout">
+                <span class="nav-icon">⏻</span>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>Welcome back, {{ user_name }} 👋</h1>
+                <p>{{ current_date }}</p>
+            </div>
+            <div class="topbar-right">
+                <div class="notification-bell">🔔</div>
+                <div class="user-avatar">{{ user_name[0] }}</div>
+            </div>
+        </div>
+
+        <!-- Account Cards -->
+        <div class="account-cards">
+            {% for account in accounts %}
+            <div class="account-card">
+                <div class="card-top">
+                    <div class="card-type">{{ account.account_type }} Account</div>
+                    <div class="card-logo">S</div>
+                </div>
+                <div class="card-balance">₹{{ "{:,.2f}".format(account.balance) }}</div>
+                <div class="card-number">{{ account.account_number }}</div>
+                <div class="card-bottom">
+                    <span>Sashakt Bank</span>
+                    <span class="card-status {{ account.status }}">{{ account.status.upper() }}</span>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Quick Actions Card -->
+            <div class="quick-actions-card">
+                <div class="qa-title">Quick Actions</div>
+                <div class="qa-grid">
+                    <a href="/transfer" class="qa-btn">
+                        <span>↔</span>
+                        <span>Transfer</span>
+                    </a>
+                    <a href="/loans" class="qa-btn">
+                        <span>🏦</span>
+                        <span>Loan</span>
+                    </a>
+                    <a href="/transactions" class="qa-btn">
+                        <span>☰</span>
+                        <span>History</span>
+                    </a>
+                    <a href="/profile" class="qa-btn">
+                        <span>👤</span>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts + Recent Transactions -->
+        <div class="dashboard-grid">
+
+            <!-- Spending Chart -->
+            <div class="chart-card">
+                <div class="card-header">
+                    <h3>Spending Overview</h3>
+                    <span class="card-badge">Last 6 months</span>
+                </div>
+                <canvas id="spendingChart"></canvas>
+            </div>
+
+            <!-- Category Chart -->
+            <div class="chart-card small">
+                <div class="card-header">
+                    <h3>Category Breakdown</h3>
+                    <span class="card-badge">This month</span>
+                </div>
+                <canvas id="categoryChart"></canvas>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="transactions-card">
+                <div class="card-header">
+                    <h3>Recent Transactions</h3>
+                    <a href="/transactions" class="view-all">View All →</a>
+                </div>
+                <div class="transaction-list">
+                    {% for txn in recent_transactions %}
+                    <div class="txn-item">
+                        <div class="txn-icon">↔</div>
+                        <div class="txn-details">
+                            <div class="txn-name">{{ txn.description or 'Transfer' }}</div>
+                            <div class="txn-date">{{ txn.created_at.strftime('%d %b %Y') }}</div>
+                        </div>
+                        <div class="txn-amount {{ 'credit' if txn.to_account == accounts[0].account_number else 'debit' }}">
+                            {{ '+' if txn.to_account == accounts[0].account_number else '-' }}₹{{ "{:,.2f}".format(txn.amount) }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="no-txn">No transactions yet</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="notifications-card">
+                <div class="card-header">
+                    <h3>Notifications</h3>
+                </div>
+                <div class="notif-list">
+                    <div class="notif-item">
+                        <div class="notif-dot green"></div>
+                        <div class="notif-text">Your account is active and secure</div>
+                    </div>
+                    <div class="notif-item">
+                        <div class="notif-dot blue"></div>
+                        <div class="notif-text">New government schemes available</div>
+                    </div>
+                    <div class="notif-item">
+                        <div class="notif-dot yellow"></div>
+                        <div class="notif-text">Complete your KYC for higher limits</div>
+                    </div>
+                    <div class="notif-item">
+                        <div class="notif-dot purple"></div>
+                        <div class="notif-text">FD rates updated — check latest rates</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-bubble" onclick="toggleChat()">
+        <span class="chatbot-icon">💬</span>
+        <span class="chatbot-text">Chat with Sasha</span>
+    </div>
+    <div class="chatbot-window" id="chatbot-window">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <div class="chat-avatar">S</div>
+                <div>
+                    <div class="chat-name">Sasha</div>
+                    <div class="chat-status">AI Banking Assistant</div>
+                </div>
+            </div>
+            <button class="chat-close" onclick="toggleChat()">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg bot">
+                <div class="msg-bubble">Hi {{ user_name }}! How can I help you today? 👋</div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="handleKey(event)">
+            <button onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // Spending Chart
+        const ctx1 = document.getElementById('spendingChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: [45000, 52000, 48000, 61000, 55000, 67000],
+                        backgroundColor: 'rgba(74, 222, 128, 0.7)',
+                        borderRadius: 8,
+                    },
+                    {
+                        label: 'Expense',
+                        data: [32000, 38000, 41000, 35000, 42000, 39000],
+                        backgroundColor: 'rgba(167, 139, 250, 0.7)',
+                        borderRadius: 8,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#94a3b8' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+
+        // Category Chart
+        const ctx2 = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Food', 'Bills', 'Transfer', 'Shopping', 'Other'],
+                datasets: [{
+                    data: [30, 25, 20, 15, 10],
+                    backgroundColor: [
+                        'rgba(167, 139, 250, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(74, 222, 128, 0.8)',
+                        'rgba(248, 113, 113, 0.8)',
+                        'rgba(148, 163, 184, 0.8)',
+                    ],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', padding: 15 }
+                    }
+                }
+            }
+        });
+
+        // Chatbot
+        function toggleChat() {
+            document.getElementById('chatbot-window').classList.toggle('open');
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            const messages = document.getElementById('chat-messages');
+            messages.innerHTML += `<div class="chat-msg user"><div class="msg-bubble">${message}</div></div>`;
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+            fetch('/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                messages.innerHTML += `<div class="chat-msg bot"><div class="msg-bubble">${data.reply}</div></div>`;
+                messages.scrollTop = messages.scrollHeight;
+            });
+        }
+    </script>
+
+</body>
+</html>
