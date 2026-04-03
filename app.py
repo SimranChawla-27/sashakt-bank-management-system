@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 import os
 import requests
 from flask import Flask, render_template, request, jsonify
+import bcrypt
+import random
+import string
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 load_dotenv()
 
 app = Flask(__name__)
@@ -178,8 +182,85 @@ def chatbot():
             return jsonify({'reply': response})
 
     return jsonify({'reply': 'I understand your query. Let me connect you with our support team. Please call 1800-XXX-XXXX or email support@sashaktbank.com for immediate assistance.'})
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        full_name = request.form.get('full_name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        aadhaar = request.form.get('aadhaar')
+        address = request.form.get('address')
+        account_type = request.form.get('account_type')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
 
+        # Validation
+        if password != confirm_password:
+            return render_template('register.html', error='Passwords do not match.')
 
+        if len(password) < 8:
+            return render_template('register.html', error='Password must be at least 8 characters.')
+
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            return render_template('register.html', error='Email already registered. Please login.')
+
+        # Hash password
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # Create user
+        new_user = User(
+            full_name=full_name,
+            email=email,
+            phone=phone,
+            aadhaar=aadhaar,
+            address=address,
+            password=hashed
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Generate account number
+        account_number = 'ACC' + ''.join(random.choices(string.digits, k=9))
+
+        # Create bank account
+        new_account = Account(
+            user_id=new_user.id,
+            account_number=account_number,
+            account_type=account_type,
+            balance=0.0,
+            status='active'
+        )
+        db.session.add(new_account)
+        db.session.commit()
+
+        return render_template('register.html', success=f'Account created successfully! Your account number is {account_number}. Please login.')
+
+    return render_template('register.html')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return render_template('login.html', error='No account found with this email.')
+
+        if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            return render_template('login.html', error='Incorrect password. Please try again.')
+
+        if not user.is_active:
+            return render_template('login.html', error='Your account has been deactivated. Please contact support.')
+
+        session['user_id'] = user.id
+        session['user_name'] = user.full_name
+        session['user_email'] = user.email
+
+        return redirect(url_for('home'))
+
+    return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=3000)

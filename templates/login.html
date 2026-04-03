@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-body">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Sashakt Bank Logo" class="logo">
+            <span class="bank-name">Sashakt Bank</span>
+        </div>
+        <div class="nav-right">
+            <a href="/">Home</a>
+            <a href="/register" class="btn-register">Register</a>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+
+        <!-- Left Side - Branding -->
+        <div class="auth-left">
+            <div class="auth-left-content">
+                <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo" class="auth-logo">
+                <h2>Welcome Back</h2>
+                <p>Empowering your Financial Future</p>
+                <div class="auth-features">
+                    <div class="auth-feature">
+                        <span>✦</span>
+                        <span>Secure 256-bit encryption</span>
+                    </div>
+                    <div class="auth-feature">
+                        <span>✦</span>
+                        <span>Real-time transaction alerts</span>
+                    </div>
+                    <div class="auth-feature">
+                        <span>✦</span>
+                        <span>24/7 AI banking support</span>
+                    </div>
+                    <div class="auth-feature">
+                        <span>✦</span>
+                        <span>Instant fund transfers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="auth-right">
+            <div class="auth-form-card">
+                <h3>Login to NetBanking</h3>
+                <p class="auth-subtitle">Enter your credentials to access your account</p>
+
+                {% if error %}
+                <div class="auth-error">{{ error }}</div>
+                {% endif %}
+
+                <form method="POST" action="/login">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" placeholder="rahul@gmail.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="auth-btn">Login to Account</button>
+                </form>
+
+                <p class="auth-switch">Don't have an account? <a href="/register">Register here</a></p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
