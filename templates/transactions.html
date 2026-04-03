@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/transactions.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item active">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" class="nav-item logout">
+                <span class="nav-icon">⏻</span>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>Transaction History</h1>
+                <p>All your transactions in one place</p>
+            </div>
+            <div class="topbar-right">
+                <button class="download-btn" onclick="downloadPassbook()">⬇ Download Passbook</button>
+                <div class="user-avatar">{{ user_name[0] }}</div>
+            </div>
+        </div>
+
+        <!-- Account Summary -->
+        <div class="account-summary">
+            <div class="summary-item">
+                <div class="summary-label">Account Number</div>
+                <div class="summary-value">{{ account.account_number }}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Account Type</div>
+                <div class="summary-value">{{ account.account_type }}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Current Balance</div>
+                <div class="summary-value green">₹{{ "{:,.2f}".format(account.balance) }}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Total Transactions</div>
+                <div class="summary-value">{{ transactions|length }}</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <input type="text" id="search-input" placeholder="Search by description or amount..." oninput="filterTransactions()">
+            <select id="type-filter" onchange="filterTransactions()">
+                <option value="all">All Types</option>
+                <option value="credit">Credit Only</option>
+                <option value="debit">Debit Only</option>
+            </select>
+            <input type="date" id="date-from" onchange="filterTransactions()">
+            <input type="date" id="date-to" onchange="filterTransactions()">
+            <button class="clear-btn" onclick="clearFilters()">Clear</button>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="transactions-table-card">
+            <table class="transactions-table" id="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>From / To</th>
+                        <th>Amount</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-body">
+                    {% for txn in transactions %}
+                    <tr class="txn-row" 
+                        data-type="{{ 'credit' if txn.to_account == account.account_number else 'debit' }}"
+                        data-description="{{ txn.description or '' }}"
+                        data-amount="{{ txn.amount }}"
+                        data-date="{{ txn.created_at.strftime('%Y-%m-%d') }}">
+                        <td>
+                            <div class="txn-date-main">{{ txn.created_at.strftime('%d %b %Y') }}</div>
+                            <div class="txn-time">{{ txn.created_at.strftime('%I:%M %p') }}</div>
+                        </td>
+                        <td>{{ txn.description or 'Transfer' }}</td>
+                        <td>
+                            <span class="type-badge {{ 'credit' if txn.to_account == account.account_number else 'debit' }}">
+                                {{ 'Credit' if txn.to_account == account.account_number else 'Debit' }}
+                            </span>
+                        </td>
+                        <td class="account-col">
+                            {% if txn.to_account == account.account_number %}
+                                From: {{ txn.from_account }}
+                            {% else %}
+                                To: {{ txn.to_account }}
+                            {% endif %}
+                        </td>
+                        <td class="{{ 'amount-credit' if txn.to_account == account.account_number else 'amount-debit' }}">
+                            {{ '+' if txn.to_account == account.account_number else '-' }}₹{{ "{:,.2f}".format(txn.amount) }}
+                        </td>
+                        <td class="balance-col">—</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="no-data">No transactions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        function filterTransactions() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const type = document.getElementById('type-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+            const rows = document.querySelectorAll('.txn-row');
+
+            rows.forEach(row => {
+                const rowType = row.dataset.type;
+                const rowDesc = row.dataset.description.toLowerCase();
+                const rowAmount = row.dataset.amount;
+                const rowDate = row.dataset.date;
+
+                let show = true;
+
+                if (search && !rowDesc.includes(search) && !rowAmount.includes(search)) show = false;
+                if (type !== 'all' && rowType !== type) show = false;
+                if (dateFrom && rowDate < dateFrom) show = false;
+                if (dateTo && rowDate > dateTo) show = false;
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function clearFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('type-filter').value = 'all';
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+            filterTransactions();
+        }
+
+        function downloadPassbook() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFillColor(26, 35, 126);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.setFont('helvetica', 'bold');
+            doc.text('SASHAKT BANK', 105, 18, { align: 'center' });
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Empowering your Financial Future', 105, 28, { align: 'center' });
+            doc.text('Account Statement / Passbook', 105, 36, { align: 'center' });
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(11);
+            doc.text('Account Holder: {{ user_name }}', 14, 52);
+            doc.text('Account Number: {{ account.account_number }}', 14, 60);
+            doc.text('Account Type: {{ account.account_type }}', 14, 68);
+            doc.text('Current Balance: Rs. {{ "{:,.2f}".format(account.balance) }}', 14, 76);
+            doc.text('Generated On: ' + new Date().toLocaleDateString(), 14, 84);
+
+            doc.setFillColor(240, 240, 255);
+            doc.rect(14, 92, 182, 8, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('DATE', 16, 98);
+            doc.text('DESCRIPTION', 50, 98);
+            doc.text('TYPE', 110, 98);
+            doc.text('AMOUNT', 145, 98);
+
+            const rows = document.querySelectorAll('.txn-row');
+            let y = 108;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+
+            rows.forEach((row, i) => {
+                if (row.style.display === 'none') return;
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                if (i % 2 === 0) {
+                    doc.setFillColor(248, 248, 255);
+                    doc.rect(14, y - 5, 182, 8, 'F');
+                }
+                const cells = row.querySelectorAll('td');
+                doc.setTextColor(0, 0, 0);
+                doc.text(cells[0].querySelector('.txn-date-main').textContent.trim(), 16, y);
+                doc.text((cells[1].textContent.trim()).substring(0, 25), 50, y);
+                doc.text(cells[2].textContent.trim(), 110, y);
+                const amount = cells[4].textContent.trim().replace('₹', 'Rs.');
+                doc.setTextColor(amount.includes('+') ? 0 : 200, amount.includes('+') ? 150 : 0, 0);
+                doc.text(amount, 145, y);
+                doc.setTextColor(0, 0, 0);
+                y += 8;
+            });
+
+            doc.setFillColor(26, 35, 126);
+            doc.rect(0, 285, 210, 12, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
+            doc.text('Sashakt Bank | support@sashaktbank.com | 1800-XXX-XXXX', 105, 293, { align: 'center' });
+
+            doc.save('Sashakt_Bank_Passbook.pdf');
+        }
+    </script>
+
+</body>
+</html>

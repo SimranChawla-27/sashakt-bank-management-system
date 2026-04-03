@@ -339,6 +339,21 @@ def get_balance():
     if account:
         return jsonify({'balance': account.balance})
     return jsonify({'balance': 0})
+@app.route('/transactions')
+def transactions():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    account = Account.query.filter_by(user_id=user.id).first()
+    all_transactions = Transaction.query.filter(
+        (Transaction.from_account == account.account_number) |
+        (Transaction.to_account == account.account_number)
+    ).order_by(Transaction.created_at.desc()).all()
+    return render_template('transactions.html',
+        user_name=user.full_name,
+        account=account,
+        transactions=all_transactions
+    )
 
 @app.route('/logout')
 def logout():
