@@ -1,0 +1,287 @@
+.transfer-container {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 20px;
+}
+
+.transfer-form-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 20px;
+    padding: 28px;
+}
+
+.transfer-steps {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.step {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    transition: all 0.3s;
+}
+
+.step.active {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.step-divider {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.account-name-preview {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.found { color: #4ade80; }
+.not-found { color: #f87171; }
+
+/* Confirm Card */
+.confirm-card {
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.confirm-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    font-size: 13px;
+}
+
+.confirm-row:last-child { border-bottom: none; }
+.confirm-row span:first-child { color: #64748b; }
+.confirm-row span:last-child { color: #e2e8f0; font-weight: 500; }
+
+.confirm-row.highlight span:last-child {
+    color: #fbbf24;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-back {
+    flex: 1;
+    background: transparent;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+/* Success Screen */
+.success-screen {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.success-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: white;
+    margin: 0 auto 20px;
+}
+
+.success-screen h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4ade80;
+    margin-bottom: 10px;
+}
+
+.success-screen p {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+.success-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* Right Side */
+.transfer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.balance-card {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+}
+
+.balance-label {
+    font-size: 12px;
+    color: #a78bfa;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.balance-amount {
+    font-size: 30px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.balance-account {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.tips-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.tips-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a78bfa;
+    margin-bottom: 14px;
+}
+
+.tip-item {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    color: #64748b;
+    padding: 6px 0;
+    line-height: 1.5;
+}
+
+.tip-item span:first-child {
+    color: #fbbf24;
+    flex-shrink: 0;
+}
+
+.beneficiary-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.beneficiary-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.beneficiary-item:hover {
+    background: rgba(139, 92, 246, 0.08);
+}
+
+.ben-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.ben-account {
+    font-size: 13px;
+    font-weight: 500;
+    color: #e2e8f0;
+}
+
+.ben-amount {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+}
+.success-buttons .auth-btn {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+
+.success-buttons .btn-back {
+    background: transparent;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #a78bfa;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+.transfer-form-card .auth-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+.transfer-form-card .auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.5);
+}

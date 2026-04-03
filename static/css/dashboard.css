@@ -434,3 +434,30 @@
 .notif-dot.blue { background: #60a5fa; }
 .notif-dot.yellow { background: #fbbf24; }
 .notif-dot.purple { background: #a78bfa; }
+/* Fix white input boxes */
+.form-group input,
+.form-group select,
+.transfer-form-card input,
+.transfer-form-card select {
+    background: #0d0d20;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s;
+    width: 100%;
+    -webkit-text-fill-color: #ffffff;
+    -webkit-box-shadow: 0 0 0px 1000px #0d0d20 inset;
+}
+
+.transfer-form-card input:focus,
+.transfer-form-card select:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.transfer-form-card input::placeholder {
+    color: #334155;
+}

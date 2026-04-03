@@ -260,6 +260,85 @@ def dashboard():
         recent_transactions=recent_transactions,
         current_date=datetime.now().strftime('%A, %d %B %Y')
     )
+@app.route('/transfer')
+def transfer():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    accounts = Account.query.filter_by(user_id=user.id).all()
+    recent_transfers = Transaction.query.filter_by(
+        from_account=accounts[0].account_number
+    ).order_by(Transaction.created_at.desc()).limit(3).all()
+    return render_template('transfer.html',
+        user_name=user.full_name,
+        accounts=accounts,
+        recent_transfers=recent_transfers
+    )
+
+@app.route('/get-account-name')
+def get_account_name():
+    account_number = request.args.get('account')
+    account = Account.query.filter_by(account_number=account_number).first()
+    if account:
+        user = User.query.get(account.user_id)
+        return jsonify({'name': user.full_name})
+    return jsonify({'name': None})
+
+@app.route('/do-transfer', methods=['POST'])
+def do_transfer():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Please login first'})
+
+    data = request.get_json()
+    from_acc_num = data.get('from_account')
+    to_acc_num = data.get('to_account')
+    amount = float(data.get('amount', 0))
+    description = data.get('description', '')
+
+    if amount <= 0:
+        return jsonify({'success': False, 'message': 'Invalid amount'})
+
+    from_account = Account.query.filter_by(account_number=from_acc_num).first()
+    to_account = Account.query.filter_by(account_number=to_acc_num).first()
+
+    if not from_account:
+        return jsonify({'success': False, 'message': 'Your account not found'})
+
+    if not to_account:
+        return jsonify({'success': False, 'message': 'Recipient account not found'})
+
+    if from_acc_num == to_acc_num:
+        return jsonify({'success': False, 'message': 'Cannot transfer to same account'})
+
+    if from_account.balance < amount:
+        return jsonify({'success': False, 'message': f'Insufficient balance. Available: ₹{from_account.balance:,.2f}'})
+
+    from_account.balance -= amount
+    to_account.balance += amount
+
+    txn = Transaction(
+        from_account=from_acc_num,
+        to_account=to_acc_num,
+        amount=amount,
+        transaction_type='transfer',
+        description=description
+    )
+    db.session.add(txn)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'₹{amount:,.2f} transferred successfully to {to_acc_num}'
+    })
+@app.route('/get-balance')
+def get_balance():
+    if 'user_id' not in session:
+        return jsonify({'balance': 0})
+    account_number = request.args.get('account')
+    account = Account.query.filter_by(account_number=account_number).first()
+    if account:
+        return jsonify({'balance': account.balance})
+    return jsonify({'balance': 0})
 
 @app.route('/logout')
 def logout():
