@@ -1,8 +1,9 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
-
+import requests
+from flask import Flask, render_template, request, jsonify
 load_dotenv()
 
 app = Flask(__name__)
@@ -109,11 +110,76 @@ class JobApplication(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 @app.route('/')
-
 def home():
-    with app.app_context():
-        db.create_all()
-    return 'Bank Management System is running!'
+    return render_template('index.html')
+@app.route('/currency-rates')
+def currency_rates():
+    try:
+        response = requests.get('https://api.exchangerate-api.com/v4/latest/USD')
+        data = response.json()
+        rates = {
+            'USD': round(data['rates']['INR'], 2),
+            'EUR': round(data['rates']['INR'] / data['rates']['EUR'], 2),
+            'GBP': round(data['rates']['INR'] / data['rates']['GBP'], 2),
+            'AED': round(data['rates']['INR'] / data['rates']['AED'], 2),
+            'SGD': round(data['rates']['INR'] / data['rates']['SGD'], 2),
+            'JPY': round(data['rates']['INR'] / data['rates']['JPY'], 2),
+        }
+        return {'rates': rates, 'status': 'success'}
+    except:
+        return {'rates': {}, 'status': 'error'}
+@app.route('/market-data')
+def market_data():
+    try:
+        gold_response = requests.get('https://api.exchangerate-api.com/v4/latest/USD')
+        gold_data = gold_response.json()
+        usd_inr = gold_data['rates']['INR']
+        return jsonify({
+            'status': 'success',
+            'data': [
+                {'name': 'SENSEX', 'value': '73,452.32', 'change': '+245.67', 'up': True},
+                {'name': 'NIFTY 50', 'value': '22,326.90', 'change': '+78.45', 'up': True},
+                {'name': 'GOLD/10g', 'value': '₹71,450', 'change': '+320', 'up': True},
+                {'name': 'USD/INR', 'value': f'₹{round(usd_inr, 2)}', 'change': '+0.12', 'up': True},
+            ]
+        })
+    except:
+        return jsonify({
+            'status': 'error',
+            'data': [
+                {'name': 'SENSEX', 'value': '73,452.32', 'change': '+245.67', 'up': True},
+                {'name': 'NIFTY 50', 'value': '22,326.90', 'change': '+78.45', 'up': True},
+                {'name': 'GOLD/10g', 'value': '₹71,450', 'change': '+320', 'up': True},
+                {'name': 'USD/INR', 'value': '₹83.50', 'change': '+0.12', 'up': True},
+            ]
+        })    
+
+
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    data = request.get_json()
+    message = data.get('message', '').lower()
+
+    faqs = {
+        'balance': 'You can check your account balance on your Dashboard after logging in.',
+        'transfer': 'Go to Transfer Money section after login. Enter account number and amount.',
+        'loan': 'Visit our Loans page to apply for Personal, Home, Car or Gold loans.',
+        'complaint': 'I am sorry to hear that. Please describe your issue and I will raise a support ticket for you.',
+        'interest': 'Our savings account offers 4.5% p.a. interest. FD rates start from 6.5% p.a.',
+        'nri': 'We offer NRE, NRO and FCNR accounts for Non-Resident Indians. Visit our NRI Banking page.',
+        'credit card': 'You can view your credit card details, transactions and statements after logging in.',
+        'careers': 'We are hiring! Visit our Careers page to see current openings and apply.',
+        'hours': 'Our branches are open Monday to Saturday, 9 AM to 5 PM.',
+        'contact': 'You can reach us at support@sashaktbank.com or call 1800-XXX-XXXX.',
+    }
+
+    for keyword, response in faqs.items():
+        if keyword in message:
+            return jsonify({'reply': response})
+
+    return jsonify({'reply': 'I understand your query. Let me connect you with our support team. Please call 1800-XXX-XXXX or email support@sashaktbank.com for immediate assistance.'})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=3000)

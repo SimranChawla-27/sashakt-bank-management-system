@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sashakt Bank - Empowering your Financial Future</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Sashakt Bank Logo" class="logo">
+            <span class="bank-name">Sashakt Bank</span>
+        </div>
+        <div class="nav-right">
+            <a href="/careers">Careers</a>
+            <a href="/schemes">Schemes</a>
+            <a href="/rates">Rates</a>
+            <a href="/nri">NRI Banking</a>
+            <a href="/login" class="btn-login">Login</a>
+            <a href="/register" class="btn-register">Register</a>
+            <a href="/employee-portal" class="btn-employee" target="_blank">Employee Portal</a>
+        </div>
+    </nav>
+<!-- Currency Ticker -->
+<div class="ticker-wrap">
+    <div class="ticker-label">LIVE RATES</div>
+    <div class="ticker-track" id="ticker-track">
+        <span class="ticker-item">Loading rates...</span>
+    </div>
+</div>
+    <!-- Hero Section -->
+    <section class="hero">
+    <canvas id="particles-canvas"></canvas>
+    <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="" style="position:absolute; width:700px; height:700px; opacity:0.06; filter:blur(2px); animation:spinLogo 20s linear infinite; z-index:1; top:calc(50% - 350px); left:calc(50% - 350px); pointer-events:none; object-fit:contain;">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+
+    <div class="hero-inner">
+
+        <!-- Left Side -->
+        <div class="hero-left">
+            <div class="hero-badge">✦ NEXT GENERATION BANKING</div>
+            <h1>Empowering your<br>Financial Future</h1>
+            <p>Experience the future of banking with Sashakt — where security meets elegance and every transaction tells your success story.</p>
+            <div class="hero-buttons">
+                <a href="/register" class="btn-primary">Open Free Account</a>
+                <a href="/login" class="btn-secondary">Login to NetBanking</a>
+            </div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="hero-right">
+
+          
+
+            <!-- Market Indices -->
+            <div class="market-card">
+                <div class="market-title">📈 Live Market</div>
+                <div class="market-grid" id="market-grid">
+                    <div class="market-item">
+                        <div class="market-name">Loading...</div>
+                    </div>
+                </div>
+            </div>
+             <!-- Stats -->
+            <div class="stats-card">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="customers">0</div>
+                        <div class="stat-label">Happy Customers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="transactions">0</div>
+                        <div class="stat-label">Daily Transactions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="branches">0</div>
+                        <div class="stat-label">Branches</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="years">0</div>
+                        <div class="stat-label">Years of Trust</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+    <!-- Services Section -->
+    <section class="services">
+        <h2>Our Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Savings Account</h3>
+                <p>Grow your money with competitive interest rates and zero minimum balance.</p>
+            </div>
+            <div class="service-card">
+                <h3>Loans</h3>
+                <p>Home, Personal, Car and Gold loans at the lowest interest rates.</p>
+            </div>
+            <div class="service-card">
+                <h3>Credit Cards</h3>
+                <p>Enjoy rewards, cashback and zero annual fee on our premium cards.</p>
+            </div>
+            <div class="service-card">
+                <h3>NRI Banking</h3>
+                <p>Seamless banking solutions for Non-Resident Indians worldwide.</p>
+            </div>
+            <div class="service-card">
+                <h3>Government Schemes</h3>
+                <p>Access PM Jan Dhan, Sukanya Samriddhi and more schemes easily.</p>
+            </div>
+            <div class="service-card">
+                <h3>Fixed Deposits</h3>
+                <p>Secure your future with high interest fixed and recurring deposits.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 Sashakt Bank — Empowering your Financial Future</p>
+       <script>
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const symbols = ['₹', '$', '€', '£', '¥', '₹', '$', '₹'];
+    const bubbles = [];
+    const count = 25;
+
+    for (let i = 0; i < count; i++) {
+        bubbles.push({
+            x: Math.random() * window.innerWidth,
+            y: window.innerHeight + Math.random() * window.innerHeight,
+            symbol: symbols[Math.floor(Math.random() * symbols.length)],
+            size: Math.random() * 32 + 20,
+            speed: Math.random() * 0.8 + 0.3,
+            opacity: Math.random() * 0.5 + 0.2,
+            drift: (Math.random() - 0.5) * 0.4
+        });
+    }
+
+    function drawBubbles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        bubbles.forEach(b => {
+            b.y -= b.speed;
+            b.x += b.drift;
+
+            if (b.y < -50) {
+                b.y = canvas.height + 50;
+                b.x = Math.random() * canvas.width;
+            }
+
+            ctx.globalAlpha = b.opacity;
+            ctx.font = `${b.size}px Segoe UI`;
+            ctx.shadowColor = '#fbbf24';
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText(b.symbol, b.x, b.y);
+        });
+
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(drawBubbles);
+    }
+    drawBubbles();
+
+    // Animated counters
+    function animateCounter(id, target, suffix) {
+        let count = 0;
+        const step = target / 100;
+        const timer = setInterval(() => {
+            count += step;
+            if (count >= target) {
+                count = target;
+                clearInterval(timer);
+            }
+            document.getElementById(id).textContent = Math.floor(count).toLocaleString() + suffix;
+        }, 20);
+    }
+    
+
+    window.addEventListener('load', () => {
+        animateCounter('customers', 10000, '+');
+        animateCounter('transactions', 5000, '+');
+        animateCounter('branches', 200, '+');
+        animateCounter('years', 25, '+');
+    });
+    // Live currency ticker
+fetch('/currency-rates')
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const rates = data.rates;
+            const currencies = [
+                { name: '🇺🇸 USD/INR', rate: rates.USD },
+                { name: '🇪🇺 EUR/INR', rate: rates.EUR },
+                { name: '🇬🇧 GBP/INR', rate: rates.GBP },
+                { name: '🇦🇪 AED/INR', rate: rates.AED },
+                { name: '🇸🇬 SGD/INR', rate: rates.SGD },
+                { name: '🇯🇵 JPY/INR', rate: rates.JPY },
+            ];
+            const track = document.getElementById('ticker-track');
+            let html = '';
+            currencies.forEach(c => {
+                html += `<span class="ticker-item">${c.name} <span>₹${c.rate}</span></span>`;
+            });
+            // Duplicate for seamless loop
+            html += html;
+            track.innerHTML = html;
+        }
+    })
+    .catch(() => {
+        document.getElementById('ticker-track').innerHTML =
+            '<span class="ticker-item">USD/INR <span>₹83.5</span></span><span class="ticker-item">EUR/INR <span>₹89.2</span></span><span class="ticker-item">GBP/INR <span>₹105.3</span></span>';
+    });
+    // Market data
+fetch('/market-data')
+    .then(res => res.json())
+    .then(data => {
+        const grid = document.getElementById('market-grid');
+        grid.innerHTML = '';
+        data.data.forEach(item => {
+            grid.innerHTML += `
+                <div class="market-item">
+                    <div class="market-name">${item.name}</div>
+                    <div class="market-value">${item.value}</div>
+                    <div class="market-change ${item.up ? 'up' : 'down'}">
+                        ${item.up ? '▲' : '▼'} ${item.change}
+                    </div>
+                </div>`;
+        });
+    });
+
+// Chatbot toggle
+function toggleChat() {
+    const window_ = document.getElementById('chatbot-window');
+    window_.classList.toggle('open');
+}
+
+function handleKey(e) {
+    if (e.key === 'Enter') sendMessage();
+}
+
+function sendSuggestion(text) {
+    document.getElementById('chat-input').value = text;
+    sendMessage();
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    if (!message) return;
+
+    const messages = document.getElementById('chat-messages');
+
+    // Add user message
+    messages.innerHTML += `
+        <div class="chat-msg user">
+            <div class="msg-bubble">${message}</div>
+        </div>`;
+
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+
+    // Send to backend
+    fetch('/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
+    })
+    .then(res => res.json())
+    .then(data => {
+        messages.innerHTML += `
+            <div class="chat-msg bot">
+                <div class="msg-bubble">${data.reply}</div>
+            </div>`;
+        messages.scrollTop = messages.scrollHeight;
+    })
+    .catch(() => {
+        messages.innerHTML += `
+            <div class="chat-msg bot">
+                <div class="msg-bubble">Sorry, I am having trouble connecting. Please try again.</div>
+            </div>`;
+        messages.scrollTop = messages.scrollHeight;
+    });
+}
+
+
+
+
+</script>
+    </footer>
+    <!-- AI Chatbot Bubble -->
+<div class="chatbot-bubble" onclick="toggleChat()">
+    <span class="chatbot-icon">💬</span>
+    <span class="chatbot-text">Chat with Sasha</span>
+</div>
+
+<!-- Chatbot Window -->
+<div class="chatbot-window" id="chatbot-window">
+    <div class="chat-header">
+        <div class="chat-header-left">
+            <div class="chat-avatar">S</div>
+            <div>
+                <div class="chat-name">Sasha</div>
+                <div class="chat-status">AI Banking Assistant</div>
+            </div>
+        </div>
+        <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+        <div class="chat-msg bot">
+            <div class="msg-bubble">Hi! I am Sasha, your Sashakt Bank assistant. How can I help you today? 👋</div>
+        </div>
+        <div class="chat-suggestions">
+            <button onclick="sendSuggestion('What is my account balance?')">Account Balance</button>
+            <button onclick="sendSuggestion('How do I transfer money?')">Transfer Money</button>
+            <button onclick="sendSuggestion('I want to raise a complaint')">Raise Complaint</button>
+        </div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="handleKey(event)">
+        <button onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
+</body>
+</html>
