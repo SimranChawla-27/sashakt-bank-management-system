@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/credit_card.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item active">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" class="nav-item logout">
+                <span class="nav-icon">⏻</span>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>Credit Card</h1>
+                <p>Manage your Sashakt Bank credit card</p>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ user_name[0] }}</div>
+            </div>
+        </div>
+
+        {% if card %}
+
+        <div class="cc-grid">
+
+            <!-- Card Visual + Details -->
+            <div class="cc-left">
+
+                <!-- Card Visual -->
+                <div class="cc-visual">
+                    <div class="cc-chip">▣</div>
+                    <div class="cc-number">**** **** **** {{ card.card_number[-4:] }}</div>
+                    <div class="cc-bottom">
+                        <div>
+                            <div class="cc-label">Card Holder</div>
+                            <div class="cc-holder">{{ user_name }}</div>
+                        </div>
+                        <div>
+                            <div class="cc-label">Valid Thru</div>
+                            <div class="cc-holder">{{ card.due_date.strftime('%m/%y') }}</div>
+                        </div>
+                        <div class="cc-brand">SASHAKT</div>
+                    </div>
+                </div>
+
+                <!-- Card Stats -->
+                <div class="cc-stats">
+                    <div class="cc-stat">
+                        <div class="cc-stat-label">Credit Limit</div>
+                        <div class="cc-stat-value">₹{{ "{:,.0f}".format(card.credit_limit) }}</div>
+                    </div>
+                    <div class="cc-stat">
+                        <div class="cc-stat-label">Outstanding</div>
+                        <div class="cc-stat-value red">₹{{ "{:,.0f}".format(card.outstanding_balance) }}</div>
+                    </div>
+                    <div class="cc-stat">
+                        <div class="cc-stat-label">Available Limit</div>
+                        <div class="cc-stat-value green">₹{{ "{:,.0f}".format(card.credit_limit - card.outstanding_balance) }}</div>
+                    </div>
+                    <div class="cc-stat">
+                        <div class="cc-stat-label">Due Date</div>
+                        <div class="cc-stat-value">{{ card.due_date.strftime('%d %b %Y') }}</div>
+                    </div>
+                </div>
+
+                <!-- Usage Bar -->
+                <div class="cc-usage-card">
+                    <div class="usage-header">
+                        <span>Credit Utilization</span>
+                        <span class="usage-pct">{{ "{:.0f}".format(card.outstanding_balance / card.credit_limit * 100) }}%</span>
+                    </div>
+                    <div class="usage-bar-bg">
+                        <div class="usage-bar-fill" style="width: {{"{:.0f}".format(card.outstanding_balance / card.credit_limit * 100) }}%"></div>
+                    </div>
+                    <div class="usage-tip">Keep utilization below 30% for a good credit score</div>
+                </div>
+
+            </div>
+
+            <!-- Right Side -->
+            <div class="cc-right">
+
+                <!-- Transaction History -->
+                <div class="cc-txn-card">
+                    <div class="cc-txn-header">
+                        <h3>Card Transactions</h3>
+                        <button class="download-btn" onclick="downloadStatement()">⬇ Statement</button>
+                    </div>
+                    <div class="cc-txn-list" id="cc-txn-list">
+                        {% for txn in card_transactions %}
+                        <div class="cc-txn-item">
+                            <div class="cc-txn-icon">💳</div>
+                            <div class="cc-txn-details">
+                                <div class="cc-txn-name">{{ txn.description or 'Card Transaction' }}</div>
+                                <div class="cc-txn-date">{{ txn.created_at.strftime('%d %b %Y %I:%M %p') }}</div>
+                            </div>
+                            <div class="cc-txn-amount debit">-₹{{ "{:,.2f}".format(txn.amount) }}</div>
+                        </div>
+                        {% else %}
+                        <div class="no-txn">No card transactions yet</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Payment Card -->
+                <div class="cc-payment-card">
+                    <h3>Pay Outstanding Bill</h3>
+                    <form method="POST" action="/credit-card/pay">
+                        <div class="form-group">
+                            <label>Payment Amount (₹)</label>
+                            <input type="number" name="amount" placeholder="Enter amount to pay" min="1" max="{{ card.outstanding_balance }}">
+                        </div>
+                        <button type="submit" class="auth-btn">Pay Now</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        {% else %}
+
+        <!-- No Card -->
+        <div class="no-card-screen">
+            <div class="no-card-icon">💳</div>
+            <h3>No Credit Card Found</h3>
+            <p>You do not have a Sashakt Bank credit card yet.</p>
+            <a href="/contact" class="auth-btn" style="display:inline-block;text-decoration:none;padding:14px 30px;">Apply for Credit Card</a>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <script>
+        function downloadStatement() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFillColor(26, 35, 126);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.text('SASHAKT BANK', 105, 16, { align: 'center' });
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Credit Card Statement', 105, 28, { align: 'center' });
+            doc.text('Empowering your Financial Future', 105, 36, { align: 'center' });
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(11);
+            doc.text('Card Holder: {{ user_name }}', 14, 52);
+            doc.text('Card Number: **** **** **** {{ card.card_number[-4:] if card else "XXXX" }}', 14, 60);
+            doc.text('Credit Limit: Rs. {{ "{:,.0f}".format(card.credit_limit) if card else "0" }}', 14, 68);
+            doc.text('Outstanding: Rs. {{ "{:,.0f}".format(card.outstanding_balance) if card else "0" }}', 14, 76);
+            doc.text('Generated On: ' + new Date().toLocaleDateString(), 14, 84);
+
+            doc.setFillColor(240, 240, 255);
+            doc.rect(14, 92, 182, 8, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('DATE', 16, 98);
+            doc.text('DESCRIPTION', 60, 98);
+            doc.text('AMOUNT', 160, 98);
+
+            const items = document.querySelectorAll('.cc-txn-item');
+            let y = 108;
+            doc.setFont('helvetica', 'normal');
+
+            items.forEach((item, i) => {
+                if (y > 270) { doc.addPage(); y = 20; }
+                if (i % 2 === 0) {
+                    doc.setFillColor(248, 248, 255);
+                    doc.rect(14, y - 5, 182, 8, 'F');
+                }
+                const date = item.querySelector('.cc-txn-date').textContent.trim();
+                const name = item.querySelector('.cc-txn-name').textContent.trim();
+                const amount = item.querySelector('.cc-txn-amount').textContent.trim().replace('₹', 'Rs.');
+                doc.setTextColor(0, 0, 0);
+                doc.text(date.substring(0, 15), 16, y);
+                doc.text(name.substring(0, 30), 60, y);
+                doc.setTextColor(200, 0, 0);
+                doc.text(amount, 160, y);
+                y += 8;
+            });
+
+            doc.setFillColor(26, 35, 126);
+            doc.rect(0, 285, 210, 12, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
+            doc.text('Sashakt Bank | support@sashaktbank.com | 1800-XXX-XXXX', 105, 293, { align: 'center' });
+
+            doc.save('Sashakt_CreditCard_Statement.pdf');
+        }
+    </script>
+
+</body>
+</html>

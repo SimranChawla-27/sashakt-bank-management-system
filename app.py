@@ -393,6 +393,35 @@ def loans():
         user_name=user.full_name,
         loans=user_loans
     )
+@app.route('/credit-card')
+def credit_card():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    card = CreditCard.query.filter_by(user_id=user.id).first()
+    card_transactions = []
+    if card:
+        card_transactions = Transaction.query.filter(
+            (Transaction.from_account == card.card_number) |
+            (Transaction.to_account == card.card_number)
+        ).order_by(Transaction.created_at.desc()).limit(10).all()
+    return render_template('credit_card.html',
+        user_name=user.full_name,
+        card=card,
+        card_transactions=card_transactions
+    )
+
+@app.route('/credit-card/pay', methods=['POST'])
+def credit_card_pay():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    card = CreditCard.query.filter_by(user_id=user.id).first()
+    amount = float(request.form.get('amount', 0))
+    if card and amount > 0:
+        card.outstanding_balance = max(0, card.outstanding_balance - amount)
+        db.session.commit()
+
 
 @app.route('/logout')
 def logout():
