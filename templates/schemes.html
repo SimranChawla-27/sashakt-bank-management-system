@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schemes - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/schemes.css') }}">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item active">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            {% if user_name == 'Guest' %}
+<a href="/login" class="nav-item" style="color:#4ade80">
+    <span class="nav-icon">→</span>
+    <span>Login</span>
+</a>
+{% else %}
+<a href="/logout" class="nav-item logout">
+    <span class="nav-icon">⏻</span>
+    <span>Logout</span>
+</a>
+{% endif %}
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>Schemes</h1>
+                <p>Government and bank schemes available for you</p>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ user_name[0] }}</div>
+            </div>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="scheme-tabs">
+            <button class="scheme-tab active" onclick="showTab('govt')">🏛 Government Schemes</button>
+            <button class="scheme-tab" onclick="showTab('bank')">🏦 Bank Schemes</button>
+        </div>
+        {% if applied_schemes %}
+        <div class="applied-banner">
+        <span>✓ You have applied for: </span>
+        {% for scheme in applied_schemes %}
+        <span class="applied-tag">{{ scheme }}</span>
+        {% endfor %}
+        </div>
+        {% endif %}
+        <!-- Government Schemes -->
+        <div id="govt-tab">
+            <div class="schemes-grid">
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">🏦</div>
+                    <div class="scheme-badge govt">Government</div>
+                    <h3>PM Jan Dhan Yojana</h3>
+                    <p>Zero balance savings account with RuPay debit card, accident insurance of ₹2 lakh and life cover of ₹30,000.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>All Indian citizens</span></div>
+                        <div class="scheme-detail"><span>Min Balance</span><span>Zero</span></div>
+                        <div class="scheme-detail"><span>Insurance</span><span>₹2 Lakh</span></div>
+                    </div>
+                    <button class="scheme-btn" data-scheme="PM Jan Dhan Yojana" onclick="applyScheme('PM Jan Dhan Yojana', 'govt')">Apply Now</button>
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">👧</div>
+                    <div class="scheme-badge govt">Government</div>
+                    <h3>Sukanya Samriddhi Yojana</h3>
+                    <p>Small savings scheme for girl child with 8.2% interest rate. Tax benefits under Section 80C up to ₹1.5 lakh.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>Girl child below 10 yrs</span></div>
+                        <div class="scheme-detail"><span>Interest Rate</span><span>8.2% p.a.</span></div>
+                        <div class="scheme-detail"><span>Min Deposit</span><span>₹250/year</span></div>
+                    </div>
+                    <button class="scheme-btn" data-scheme="Sukanya Samriddhi Yojana" onclick="applyScheme('Sukanya Samriddhi Yojana', 'govt')">Apply Now</button>
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">👴</div>
+                    <div class="scheme-badge govt">Government</div>
+                    <h3>Atal Pension Yojana</h3>
+                    <p>Guaranteed pension scheme for unorganised sector workers. Get pension of ₹1000 to ₹5000 per month after age 60.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>Age 18-40 years</span></div>
+                        <div class="scheme-detail"><span>Pension</span><span>₹1000-₹5000/month</span></div>
+                        <div class="scheme-detail"><span>Retirement Age</span><span>60 years</span></div>
+                    </div>
+                    <button class="scheme-btn" data-scheme="Atal Pension Yojana" onclick="applyScheme('Atal Pension Yojana', 'govt')">Apply Now</button>
+                </div>
+                <div class="scheme-card">
+                    <div class="scheme-icon">🛡</div>
+                    <div class="scheme-badge govt">Government</div>
+                    <h3>PMSBY — Accident Insurance</h3>
+                    <p>Pradhan Mantri Suraksha Bima Yojana — accident insurance cover of ₹2 lakh at just ₹20 per year premium.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>Age 18-70 years</span></div>
+                        <div class="scheme-detail"><span>Cover</span><span>₹2 Lakh</span></div>
+                        <div class="scheme-detail"><span>Premium</span><span>₹20/year</span></div>
+                    </div>
+                    <button class="scheme-btn" data-scheme="PMSBY" onclick="applyScheme('PMSBY', 'govt')">Apply Now</button>
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">❤️</div>
+                    <div class="scheme-badge govt">Government</div>
+                    <h3>PMJJBY — Life Insurance</h3>
+                    <p>Pradhan Mantri Jeevan Jyoti Bima Yojana — life insurance cover of ₹2 lakh at ₹436 per year premium.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>Age 18-50 years</span></div>
+                        <div class="scheme-detail"><span>Cover</span><span>₹2 Lakh</span></div>
+                        <div class="scheme-detail"><span>Premium</span><span>₹436/year</span></div>
+                    </div>
+                    <button class="scheme-btn" data-scheme="PMJJBY" onclick="applyScheme('PMJJBY', 'govt')">Apply Now</button>
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">🌾</div>
+                    <div class="scheme-badge govt">Government</div>
+                    <h3>Kisan Credit Card</h3>
+                    <p>Credit facility for farmers to meet agricultural expenses. Low interest rate of 4% with flexible repayment options.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>Farmers only</span></div>
+                        <div class="scheme-detail"><span>Interest Rate</span><span>4% p.a.</span></div>
+                        <div class="scheme-detail"><span>Limit</span><span>Up to ₹3 Lakh</span></div>
+                    </div>
+                    <button class="scheme-btn" data-scheme="Kisan Credit Card" onclick="applyScheme('Kisan Credit Card', 'govt')">Apply Now</button>
+                    </div>
+            </div>
+        </div>
+
+        <!-- Bank Schemes -->
+        <div id="bank-tab" style="display:none">
+            <div class="schemes-grid">
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">📈</div>
+                    <div class="scheme-badge bank">Bank Scheme</div>
+                    <h3>Fixed Deposit</h3>
+                    <p>Earn guaranteed returns on your savings with our high-interest fixed deposits. Senior citizens get 0.5% extra.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Interest Rate</span><span>6.5% - 7.5% p.a.</span></div>
+                        <div class="scheme-detail"><span>Min Amount</span><span>₹1,000</span></div>
+                        <div class="scheme-detail"><span>Tenure</span><span>7 days - 10 years</span></div>
+                    </div>
+                    <button class="scheme-btn bank-btn" data-scheme="Fixed Deposit" onclick="applyScheme('Fixed Deposit', 'bank')">Open FD</button>
+
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">💰</div>
+                    <div class="scheme-badge bank">Bank Scheme</div>
+                    <h3>Recurring Deposit</h3>
+                    <p>Save small amounts monthly and earn fixed interest. Perfect for salaried individuals building a corpus.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Interest Rate</span><span>6.0% - 7.0% p.a.</span></div>
+                        <div class="scheme-detail"><span>Min Amount</span><span>₹500/month</span></div>
+                        <div class="scheme-detail"><span>Tenure</span><span>6 months - 10 years</span></div>
+                    </div>
+                    <button class="scheme-btn bank-btn" data-scheme="Recurring Deposit" onclick="applyScheme('Recurring Deposit', 'bank')">Open RD</button>
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">👴</div>
+                    <div class="scheme-badge bank">Bank Scheme</div>
+                    <h3>Senior Citizen Savings</h3>
+                    <p>Special savings account for senior citizens with higher interest rates and quarterly interest payout.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Interest Rate</span><span>8.2% p.a.</span></div>
+                        <div class="scheme-detail"><span>Eligibility</span><span>Age 60+ years</span></div>
+                        <div class="scheme-detail"><span>Max Deposit</span><span>₹30 Lakhs</span></div>
+                    </div>
+                    <button class="scheme-btn bank-btn" data-scheme="Senior Citizen Savings" onclick="applyScheme('Senior Citizen Savings', 'bank')">Apply Now</button>
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">💼</div>
+                    <div class="scheme-badge bank">Bank Scheme</div>
+                    <h3>Tax Saver FD</h3>
+                    <p>Fixed deposit with tax benefits under Section 80C. Save up to ₹46,800 in taxes annually.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Interest Rate</span><span>7.0% p.a.</span></div>
+                        <div class="scheme-detail"><span>Lock-in Period</span><span>5 years</span></div>
+                        <div class="scheme-detail"><span>Tax Benefit</span><span>Up to ₹1.5 Lakh</span></div>
+                    </div>
+                    <button class="scheme-btn bank-btn" data-scheme="Tax Saver FD" onclick="applyScheme('Tax Saver FD', 'bank')">Open Now</button>
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">🎓</div>
+                    <div class="scheme-badge bank">Bank Scheme</div>
+                    <h3>Sashakt Youth Savings</h3>
+                    <p>Special account for students and young professionals with zero minimum balance and free debit card.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>Age 18-35 years</span></div>
+                        <div class="scheme-detail"><span>Min Balance</span><span>Zero</span></div>
+                        <div class="scheme-detail"><span>Interest Rate</span><span>4.0% p.a.</span></div>
+                    </div>
+                    <button class="scheme-btn bank-btn" data-scheme="Sashakt Youth Savings" onclick="applyScheme('Sashakt Youth Savings', 'bank')">Open Account</button>
+
+                </div>
+
+                <div class="scheme-card">
+                    <div class="scheme-icon">🏢</div>
+                    <div class="scheme-badge bank">Bank Scheme</div>
+                    <h3>Business Current Account</h3>
+                    <p>Feature-rich current account for businesses with free NEFT/RTGS, dedicated relationship manager.</p>
+                    <div class="scheme-details">
+                        <div class="scheme-detail"><span>Eligibility</span><span>Business owners</span></div>
+                        <div class="scheme-detail"><span>Min Balance</span><span>₹10,000</span></div>
+                        <div class="scheme-detail"><span>Free Transactions</span><span>Unlimited</span></div>
+                    </div>
+                    <button class="scheme-btn bank-btn" data-scheme="Business Current Account" onclick="applyScheme('Business Current Account', 'bank')">Apply Now</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Apply Modal -->
+        <div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+            <div class="modal-card" onclick="event.stopPropagation()">
+                <div class="modal-icon">✓</div>
+                <h3 id="modal-title">Application Submitted</h3>
+                <p id="modal-message"></p>
+                <button class="scheme-btn" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function showTab(tab) {
+            document.getElementById('govt-tab').style.display = tab === 'govt' ? 'block' : 'none';
+            document.getElementById('bank-tab').style.display = tab === 'bank' ? 'block' : 'none';
+            document.querySelectorAll('.scheme-tab').forEach((t, i) => {
+                t.classList.toggle('active', (tab === 'govt' && i === 0) || (tab === 'bank' && i === 1));
+            });
+        }
+
+       function applyScheme(name, type) {
+    const isGuest = "{{ user_name }}" === "Guest";
+    if (isGuest) {
+        window.location.href = '/login';
+        return;
+    }
+
+    fetch('/apply-scheme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scheme_name: name, scheme_type: type })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.redirect) {
+            window.location.href = data.redirect;
+            return;
+        }
+        document.getElementById('modal-title').textContent = data.success ? 'Applied Successfully!' : 'Already Applied!';
+        document.getElementById('modal-message').textContent = data.message;
+        document.getElementById('modal-overlay').style.display = 'flex';
+        if (data.success) {
+            const btn = document.querySelector(`[data-scheme="${name}"]`);
+            if (btn) {
+                btn.textContent = '✓ Applied';
+                btn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
+                btn.style.color = '#0a0a1a';
+                btn.disabled = true;
+            }
+        }
+    });
+}
+    
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+.rates-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.rate-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 18px;
+    padding: 22px;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.rate-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow: 0 15px 40px rgba(124, 58, 237, 0.15);
+}
+
+.rate-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.rate-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.rate-value {
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    margin-bottom: 2px;
+}
+
+.rate-label {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 16px;
+}
+
+.rate-details {
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 16px;
+    flex: 1;
+}
+
+.rate-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+}
+
+.rate-row:last-child { border-bottom: none; }
+.rate-row span:first-child { color: #64748b; }
+.rate-row span:last-child { color: #e2e8f0; font-weight: 600; }
+
+.rate-btn {
+    display: block;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s;
+    margin-top: auto;
+}
+
+.rate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(124, 58, 237, 0.4);
+}
+
+/* Gold Calculator */
+.gold-calculator {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 10px;
+}
+
+.gold-calc-left h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fbbf24;
+    margin-bottom: 8px;
+}
+
+.gold-calc-left p {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.gold-calc-right {
+    background: rgba(251, 191, 36, 0.05);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+}
+
+.gold-result-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fbbf24;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.gold-result-amount {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fbbf24;
+    margin-bottom: 6px;
+}
+
+.gold-result-label {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+.gold-result-details {
+    text-align: left;
+}
+
+.gold-detail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(251, 191, 36, 0.1);
+}
+
+.gold-detail:last-child { border-bottom: none; }
+.gold-detail span:first-child { color: #64748b; }
+.gold-detail span:last-child { color: #e2e8f0; font-weight: 600; }

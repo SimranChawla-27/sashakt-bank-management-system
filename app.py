@@ -9,6 +9,8 @@ import random
 import string
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
 load_dotenv()
 
 app = Flask(__name__)
@@ -16,6 +18,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/uploads/loan_docs'
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+os.makedirs('static/uploads/loan_docs', exist_ok=True)
 
 db = SQLAlchemy(app)
 class User(db.Model):
@@ -49,16 +54,7 @@ class Transaction(db.Model):
     description = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-class Loan(db.Model):
-    __tablename__ = 'loans'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    loan_type = db.Column(db.String(50), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
-    tenure = db.Column(db.Integer, nullable=False)
-    interest_rate = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
 
 class CreditCard(db.Model):
     __tablename__ = 'credit_cards'
@@ -114,25 +110,98 @@ class JobApplication(db.Model):
    
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+class SchemeApplication(db.Model):
+    __tablename__ = 'scheme_applications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    scheme_name = db.Column(db.String(100), nullable=False)
+    scheme_type = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+class InterestRate(db.Model):
+    __tablename__ = 'interest_rates'
+    id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.String(100), nullable=False)
+    min_rate = db.Column(db.Float, nullable=False)
+    max_rate = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(20), nullable=False)
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())    
+class Loan(db.Model):
+    __tablename__ = 'loans'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    loan_type = db.Column(db.String(50), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    tenure = db.Column(db.Integer, nullable=False)
+    interest_rate = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    income_proof = db.Column(db.String(200))
+    id_proof = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())    
 @app.route('/')
 def home():
     return render_template('index.html')
+@app.route('/check-login')
+def check_login():
+    return jsonify({'logged_in': 'user_id' in session})
+@app.route('/apply-scheme', methods=['POST'])
+def apply_scheme():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'redirect': '/login'})
+    
+    data = request.get_json()
+    scheme_name = data.get('scheme_name')
+    scheme_type = data.get('scheme_type')
+
+    existing = SchemeApplication.query.filter_by(
+        user_id=session['user_id'],
+        scheme_name=scheme_name
+    ).first()
+
+    if existing:
+        return jsonify({'success': False, 'message': 'You have already applied for this scheme.'})
+
+    application = SchemeApplication(
+        user_id=session['user_id'],
+        scheme_name=scheme_name,
+        scheme_type=scheme_type
+    )
+    db.session.add(application)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': f'Successfully applied for {scheme_name}. Our team will contact you within 2 working days.'})
 @app.route('/currency-rates')
 def currency_rates():
     try:
-        response = requests.get('https://api.exchangerate-api.com/v4/latest/USD')
+        response = requests.get(
+            'https://api.frankfurter.app/latest?from=USD&to=INR,EUR,GBP,JPY,SGD',
+            headers={'Cache-Control': 'no-cache'}
+        )
         data = response.json()
-        rates = {
-            'USD': round(data['rates']['INR'], 2),
-            'EUR': round(data['rates']['INR'] / data['rates']['EUR'], 2),
-            'GBP': round(data['rates']['INR'] / data['rates']['GBP'], 2),
-            'AED': round(data['rates']['INR'] / data['rates']['AED'], 2),
-            'SGD': round(data['rates']['INR'] / data['rates']['SGD'], 2),
-            'JPY': round(data['rates']['INR'] / data['rates']['JPY'], 2),
-        }
-        return {'rates': rates, 'status': 'success'}
-    except:
-        return {'rates': {}, 'status': 'error'}
+        rates = data['rates']
+        return jsonify({
+            'rates': {
+                'USD': rates['INR'],
+                'EUR': round(rates['INR'] / rates['EUR'], 2),
+                'GBP': round(rates['INR'] / rates['GBP'], 2),
+                'SGD': round(rates['INR'] / rates['SGD'], 2),
+                'JPY': round(rates['INR'] / rates['JPY'], 2),
+            },
+            'status': 'success',
+            'date': data['date']
+        })
+    except Exception as e:
+        return jsonify({
+            'rates': {
+                'USD': 93.25,
+                'EUR': 101.50,
+                'GBP': 120.30,
+                'SGD': 72.10,
+                'JPY': 0.62,
+            },
+            'status': 'fallback',
+            'date': 'N/A'
+        })
 @app.route('/market-data')
 def market_data():
     try:
@@ -362,18 +431,59 @@ def loans():
     user_loans = Loan.query.filter_by(user_id=user.id).order_by(Loan.created_at.desc()).all()
 
     if request.method == 'POST':
-        loan_type = request.form.get('loan_type')
-        amount = float(request.form.get('amount', 0))
-        tenure = int(request.form.get('tenure', 0))
-        interest_rate = float(request.form.get('interest_rate', 0))
+     loan_type = request.form.get('loan_type')
+    amount = float(request.form.get('amount', 0))
+    tenure = int(request.form.get('tenure', 0))
+    interest_rate = float(request.form.get('interest_rate', 0))
 
-        if amount <= 0 or tenure <= 0 or interest_rate <= 0:
+    income_proof_path = None
+    id_proof_path = None
+
+    if 'income_proof' in request.files:
+        file = request.files['income_proof']
+        if file.filename != '':
+            filename = secure_filename(f"income_{session['user_id']}_{file.filename}")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            income_proof_path = filename
+
+    if 'id_proof' in request.files:
+        file = request.files['id_proof']
+        if file.filename != '':
+            filename = secure_filename(f"id_{session['user_id']}_{file.filename}")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            id_proof_path = filename
+
+    if amount <= 0 or tenure <= 0 or interest_rate <= 0:
+        return render_template('loans.html',
+            user_name=user.full_name,
+            loans=user_loans,
+            error='Please fill all fields correctly.')
+
+    new_loan = Loan(
+        user_id=user.id,
+        loan_type=loan_type,
+        amount=amount,
+        tenure=tenure,
+        interest_rate=interest_rate,
+        status='pending',
+        income_proof=income_proof_path,
+        id_proof=id_proof_path
+    )
+    db.session.add(new_loan)
+    db.session.commit()
+
+    return render_template('loans.html',
+        user_name=user.full_name,
+        loans=Loan.query.filter_by(user_id=user.id).order_by(Loan.created_at.desc()).all(),
+        success='Loan application submitted successfully with documents!')
+
+    if amount <= 0 or tenure <= 0 or interest_rate <= 0:
             return render_template('loans.html',
                 user_name=user.full_name,
                 loans=user_loans,
                 error='Please fill all fields correctly.')
 
-        new_loan = Loan(
+            new_loan = Loan(
             user_id=user.id,
             loan_type=loan_type,
             amount=amount,
@@ -381,10 +491,10 @@ def loans():
             interest_rate=interest_rate,
             status='pending'
         )
-        db.session.add(new_loan)
-        db.session.commit()
+    db.session.add(new_loan)
+    db.session.commit()
 
-        return render_template('loans.html',
+    return render_template('loans.html',
             user_name=user.full_name,
             loans=Loan.query.filter_by(user_id=user.id).order_by(Loan.created_at.desc()).all(),
             success='Loan application submitted successfully! We will review it shortly.')
@@ -422,7 +532,54 @@ def credit_card_pay():
         card.outstanding_balance = max(0, card.outstanding_balance - amount)
         db.session.commit()
 
+@app.route('/schemes')
+def schemes():
+    user_name = 'Guest'
+    user_applications = []
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        user_name = user.full_name
+        user_applications = SchemeApplication.query.filter_by(
+            user_id=session['user_id']
+        ).all()
+    applied_schemes = [a.scheme_name for a in user_applications]
+    return render_template('schemes.html',
+        user_name=user_name,
+        applied_schemes=applied_schemes
+    )
+@app.route('/rates')
+def rates():
+    user_name = 'Guest'
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        user_name = user.full_name
+    loan_rates = InterestRate.query.filter_by(category='loan').all()
+    deposit_rates = InterestRate.query.filter_by(category='deposit').all()
+    gold_rates = InterestRate.query.filter_by(category='gold').all()
+    return render_template('rates.html',
+        user_name=user_name,
+        loan_rates=loan_rates,
+        deposit_rates=deposit_rates,
+        gold_rates=gold_rates
+    )
+@app.route('/gold-rate')
+def gold_rate():
+    try:
+        response = requests.get('https://api.exchangerate-api.com/v4/latest/USD')
+        data = response.json()
+        usd_inr = data['rates']['INR']
+        gold_per_gram_usd = 63.5
+        gold_per_gram_inr = round(gold_per_gram_usd * usd_inr, 0)
+        return jsonify({'rate': gold_per_gram_inr, 'status': 'success'})
+    except:
+        return jsonify({'rate': 7145, 'status': 'fallback'})
 
+@app.route('/nri')
+def nri():
+    user_name = 'Guest'
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        user_name = user.full_name
 @app.route('/logout')
 def logout():
     session.clear()
@@ -451,6 +608,24 @@ def login():
         return redirect(url_for('dashboard'))
 
     return render_template('login.html')
+@app.route('/get-loan-rate')
+def get_loan_rate():
+    loan_type = request.args.get('type')
+    rate_map = {
+        'Personal': 'Personal Loan',
+        'Home': 'Home Loan',
+        'Car': 'Car Loan',
+        'Education': 'Education Loan',
+        'Gold': 'Gold Loan'
+    }
+    product_name = rate_map.get(loan_type, 'Personal Loan')
+    rate = InterestRate.query.filter_by(
+        product_name=product_name,
+        category='loan'
+    ).first()
+    if rate:
+        return jsonify({'min_rate': rate.min_rate, 'max_rate': rate.max_rate})
+    return jsonify({'min_rate': 10.5, 'max_rate': 18.0})
 
 
 if __name__ == '__main__':

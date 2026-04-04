@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rates - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rates.css') }}">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item active">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            {% if user_name == 'Guest' %}
+            <a href="/login" class="nav-item" style="color:#4ade80">
+                <span class="nav-icon">→</span>
+                <span>Login</span>
+            </a>
+            {% else %}
+            <a href="/logout" class="nav-item logout">
+                <span class="nav-icon">⏻</span>
+                <span>Logout</span>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>Interest Rates</h1>
+                <p>Transparent rate cards for all products — updated regularly</p>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ user_name[0] }}</div>
+            </div>
+        </div>
+
+        <!-- Rate Tabs -->
+        <div class="scheme-tabs">
+            <button class="scheme-tab active" onclick="showRateTab('loans')">🏦 Loan Rates</button>
+            <button class="scheme-tab" onclick="showRateTab('deposits')">📈 Deposit Rates</button>
+            <button class="scheme-tab" onclick="showRateTab('gold')">🥇 Gold Loan</button>
+        </div>
+
+       <!-- Loan Rates -->
+<div id="loans-tab">
+    <div class="rates-grid">
+        {% set loan_icons = {'Personal Loan': '👤', 'Home Loan': '🏠', 'Car Loan': '🚗', 'Education Loan': '📚'} %}
+        {% for rate in loan_rates %}
+        <div class="rate-card">
+            <div class="rate-icon">{{ loan_icons.get(rate.product_name, '🏦') }}</div>
+            <div class="rate-name">{{ rate.product_name }}</div>
+            <div class="rate-value">{{ rate.min_rate }}% - {{ rate.max_rate }}%</div>
+            <div class="rate-label">per annum</div>
+            <div class="rate-details">
+                <div class="rate-row"><span>Min Rate</span><span>{{ rate.min_rate }}% p.a.</span></div>
+                <div class="rate-row"><span>Max Rate</span><span>{{ rate.max_rate }}% p.a.</span></div>
+                <div class="rate-row"><span>Last Updated</span><span>{{ rate.updated_at.strftime('%d %b %Y') }}</span></div>
+            </div>
+            <a href="/loans" class="rate-btn">Apply Now</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+        <!-- Deposit Rates -->
+<div id="deposits-tab" style="display:none">
+    <div class="rates-grid">
+        {% set deposit_icons = {'Savings Account': '💰', 'Fixed Deposit': '📈', 'Recurring Deposit': '💼', 'Senior Citizen FD': '👴'} %}
+        {% for rate in deposit_rates %}
+        <div class="rate-card">
+            <div class="rate-icon">{{ deposit_icons.get(rate.product_name, '💰') }}</div>
+            <div class="rate-name">{{ rate.product_name }}</div>
+            <div class="rate-value">{{ rate.min_rate }}% - {{ rate.max_rate }}%</div>
+            <div class="rate-label">per annum</div>
+            <div class="rate-details">
+                <div class="rate-row"><span>Min Rate</span><span>{{ rate.min_rate }}% p.a.</span></div>
+                <div class="rate-row"><span>Max Rate</span><span>{{ rate.max_rate }}% p.a.</span></div>
+                <div class="rate-row"><span>Last Updated</span><span>{{ rate.updated_at.strftime('%d %b %Y') }}</span></div>
+            </div>
+            <a href="/schemes" class="rate-btn">Open Now</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+        <!-- Gold Loan Rates -->
+        <div id="gold-tab" style="display:none">
+
+            <!-- Gold Rate Calculator -->
+            <div class="gold-calculator">
+                <div class="gold-calc-left">
+                    <h3>Gold Loan Calculator</h3>
+                    <p>Calculate your eligible loan amount based on gold weight and purity</p>
+                    <div class="form-group">
+                        <label>Gold Weight (grams)</label>
+                        <input type="number" id="gold-weight" placeholder="e.g. 10" oninput="calculateGoldLoan()">
+                    </div>
+                    <div class="form-group">
+                        <label>Gold Purity</label>
+                        <select id="gold-purity" onchange="calculateGoldLoan()">
+                            <option value="0.999">24K (99.9%)</option>
+                            <option value="0.916">22K (91.6%)</option>
+                            <option value="0.750">18K (75.0%)</option>
+                            <option value="0.585">14K (58.5%)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Live Gold Rate (₹/gram)</label>
+                        <input type="number" id="gold-rate" value="7145" oninput="calculateGoldLoan()">
+                    </div>
+                </div>
+                <div class="gold-calc-right" id="gold-result" style="display:none">
+                    <div class="gold-result-title">Loan Eligibility</div>
+                    <div class="gold-result-amount" id="gold-loan-amount">₹0</div>
+                    <div class="gold-result-label">Maximum loan amount (75% LTV)</div>
+                    <div class="gold-result-details">
+                        <div class="gold-detail"><span>Gold Value</span><span id="gold-value">₹0</span></div>
+                        <div class="gold-detail"><span>LTV Ratio</span><span>75%</span></div>
+                        <div class="gold-detail"><span>Interest Rate</span><span>7.5% p.a.</span></div>
+                        <div class="gold-detail"><span>Processing Fee</span><span>0.25%</span></div>
+                    </div>
+                    <a href="/loans" class="rate-btn" style="display:block;text-align:center;text-decoration:none;margin-top:16px">Apply for Gold Loan</a>
+                </div>
+            </div>
+
+            <!-- Gold Loan Rate Cards -->
+                <div class="rates-grid" style="margin-top:20px">
+                  {% set gold_icons = {'Gold Loan': '🥇', 'Bullet Repayment Gold': '⚡', 'Overdraft Against Gold': '🔄'} %}
+                   {% for rate in gold_rates %}
+                  <div class="rate-card">
+                  <div class="rate-icon">{{ gold_icons.get(rate.product_name, '🥇') }}</div>
+                  <div class="rate-name">{{ rate.product_name }}</div>
+                  <div class="rate-value">{{ rate.min_rate }}% - {{ rate.max_rate }}%</div>
+                  <div class="rate-label">per annum</div>
+                  <div class="rate-details">
+                  <div class="rate-row"><span>Min Rate</span><span>{{ rate.min_rate }}% p.a.</span></div>
+                  <div class="rate-row"><span>Max Rate</span><span>{{ rate.max_rate }}% p.a.</span></div>
+                  <div class="rate-row"><span>Last Updated</span><span>{{ rate.updated_at.strftime('%d %b %Y') }}</span></div>
+                </div>
+                 <a href="/loans" class="rate-btn">Apply Now</a>
+                </div>
+                   {% endfor %}
+                </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function showRateTab(tab) {
+            document.getElementById('loans-tab').style.display = tab === 'loans' ? 'block' : 'none';
+            document.getElementById('deposits-tab').style.display = tab === 'deposits' ? 'block' : 'none';
+            document.getElementById('gold-tab').style.display = tab === 'gold' ? 'block' : 'none';
+            document.querySelectorAll('.scheme-tab').forEach((t, i) => {
+                t.classList.toggle('active',
+                    (tab === 'loans' && i === 0) ||
+                    (tab === 'deposits' && i === 1) ||
+                    (tab === 'gold' && i === 2)
+                );
+            });
+        }
+
+        function calculateGoldLoan() {
+            const weight = parseFloat(document.getElementById('gold-weight').value);
+            const purity = parseFloat(document.getElementById('gold-purity').value);
+            const rate = parseFloat(document.getElementById('gold-rate').value);
+
+            if (!weight || !purity || !rate) return;
+
+            const goldValue = weight * purity * rate;
+            const loanAmount = goldValue * 0.75;
+
+            document.getElementById('gold-result').style.display = 'block';
+            document.getElementById('gold-value').textContent = '₹' + goldValue.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+            document.getElementById('gold-loan-amount').textContent = '₹' + loanAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        }
+        fetch('/gold-rate')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('gold-rate').value = data.rate;
+    });
+    </script>
+
+</body>
+</html>

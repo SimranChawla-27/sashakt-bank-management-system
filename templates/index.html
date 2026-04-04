@@ -19,8 +19,10 @@
             <a href="/schemes">Schemes</a>
             <a href="/rates">Rates</a>
             <a href="/nri">NRI Banking</a>
-            <a href="/login" class="btn-login">Login</a>
-            <a href="/register" class="btn-register">Register</a>
+            <a href="/login" class="btn-login" id="nav-login">Login</a>
+            <a href="/register" class="btn-register" id="nav-register">Register</a>
+            <a href="/dashboard" class="btn-register" id="nav-dashboard" style="display:none">My Account</a>
+            <a href="/logout" class="btn-login" id="nav-logout" style="display:none">Logout</a>
             <a href="/employee-portal" class="btn-employee" target="_blank">Employee Portal</a>
         </div>
     </nav>
@@ -92,41 +94,53 @@
     </div>
 </section>
 
-    <!-- Services Section -->
-    <section class="services">
-        <h2>Our Services</h2>
-        <div class="services-grid">
-            <div class="service-card">
-                <h3>Savings Account</h3>
-                <p>Grow your money with competitive interest rates and zero minimum balance.</p>
-            </div>
-            <div class="service-card">
-                <h3>Loans</h3>
-                <p>Home, Personal, Car and Gold loans at the lowest interest rates.</p>
-            </div>
-            <div class="service-card">
-                <h3>Credit Cards</h3>
-                <p>Enjoy rewards, cashback and zero annual fee on our premium cards.</p>
-            </div>
-            <div class="service-card">
-                <h3>NRI Banking</h3>
-                <p>Seamless banking solutions for Non-Resident Indians worldwide.</p>
-            </div>
-            <div class="service-card">
-                <h3>Government Schemes</h3>
-                <p>Access PM Jan Dhan, Sukanya Samriddhi and more schemes easily.</p>
-            </div>
-            <div class="service-card">
-                <h3>Fixed Deposits</h3>
-                <p>Secure your future with high interest fixed and recurring deposits.</p>
-            </div>
-        </div>
-    </section>
+    <div class="services-grid">
+    <a href="/schemes" class="service-card">
+        <span class="service-icon">🏛️</span>
+        <h3>Government Schemes</h3>
+        <p>PM Jan Dhan, Sukanya Samriddhi, Atal Pension and more schemes at your fingertips.</p>
+    </a>
+    <a href="/schemes" class="service-card">
+        <span class="service-icon">📈</span>
+        <h3>Fixed Deposits</h3>
+        <p>Earn up to 7.5% p.a. on fixed deposits. Special rates for senior citizens.</p>
+    </a>
+    <a href="/loans" class="service-card">
+        <span class="service-icon">🏠</span>
+        <h3>Loans</h3>
+        <p>Home, Personal, Car and Gold loans at the lowest interest rates with instant approval.</p>
+    </a>
+    <a href="/credit-card" class="service-card">
+        <span class="service-icon">💳</span>
+        <h3>Credit Cards</h3>
+        <p>Enjoy rewards, cashback and zero annual fee on our premium credit cards.</p>
+    </a>
+    <a href="/nri" class="service-card">
+        <span class="service-icon">🌍</span>
+        <h3>NRI Banking</h3>
+        <p>NRE, NRO and FCNR accounts with live currency conversion for Non-Resident Indians.</p>
+    </a>
+    <a href="/rates" class="service-card">
+        <span class="service-icon">📊</span>
+        <h3>Interest Rates</h3>
+        <p>Transparent rate cards for all loans, deposits and gold loans updated regularly.</p>
+    </a>
+</div>
 
     <!-- Footer -->
     <footer class="footer">
         <p>© 2025 Sashakt Bank — Empowering your Financial Future</p>
        <script>
+          fetch('/check-login',{ cache: 'no-store' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.logged_in) {
+            document.getElementById('nav-login').style.display = 'none';
+            document.getElementById('nav-register').style.display = 'none';
+            document.getElementById('nav-dashboard').style.display = 'inline-block';
+            document.getElementById('nav-logout').style.display = 'inline-block';
+        }
+    });  
     const canvas = document.getElementById('particles-canvas');
     const ctx = canvas.getContext('2d');
 
@@ -200,19 +214,18 @@
         animateCounter('years', 25, '+');
     });
     // Live currency ticker
-fetch('/currency-rates')
+fetch('/currency-rates',{ cache: 'no-store' })
     .then(res => res.json())
     .then(data => {
         if (data.status === 'success') {
             const rates = data.rates;
             const currencies = [
-                { name: '🇺🇸 USD/INR', rate: rates.USD },
-                { name: '🇪🇺 EUR/INR', rate: rates.EUR },
-                { name: '🇬🇧 GBP/INR', rate: rates.GBP },
-                { name: '🇦🇪 AED/INR', rate: rates.AED },
-                { name: '🇸🇬 SGD/INR', rate: rates.SGD },
-                { name: '🇯🇵 JPY/INR', rate: rates.JPY },
-            ];
+    { name: '🇺🇸 USD/INR', rate: rates.USD },
+    { name: '🇪🇺 EUR/INR', rate: rates.EUR },
+    { name: '🇬🇧 GBP/INR', rate: rates.GBP },
+    { name: '🇸🇬 SGD/INR', rate: rates.SGD },
+    { name: '🇯🇵 JPY/INR', rate: rates.JPY },
+];
             const track = document.getElementById('ticker-track');
             let html = '';
             currencies.forEach(c => {

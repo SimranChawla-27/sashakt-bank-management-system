@@ -121,7 +121,7 @@
                 <div class="auth-success">{{ success }}</div>
                 {% endif %}
 
-                <form method="POST" action="/loans">
+                <form method="POST" action="/loans" enctype="multipart/form-data"></form>
                     <div class="form-group">
                         <label>Loan Type</label>
                         <select name="loan_type" id="loan-type-select">
@@ -141,9 +141,13 @@
                         <input type="number" name="tenure" id="loan-tenure" placeholder="e.g. 24" min="6" max="360" oninput="calculateEMI()">
                     </div>
                     <div class="form-group">
-                        <label>Interest Rate (% p.a.)</label>
-                        <input type="number" name="interest_rate" id="loan-rate" placeholder="e.g. 10.5" step="0.1" oninput="calculateEMI()">
-                    </div>
+    <label>Interest Rate (% p.a.)</label>
+    <input type="number" name="interest_rate" id="loan-rate" 
+           placeholder="Auto-filled based on loan type" 
+           step="0.1" readonly
+           style="opacity:0.7;cursor:not-allowed;">
+    <div class="file-hint">Rate is set by Sashakt Bank based on loan type</div>
+</div>
 
                     <!-- EMI Calculator Result -->
                     <div class="emi-result" id="emi-result" style="display:none">
@@ -160,7 +164,16 @@
                             <span id="total-interest">—</span>
                         </div>
                     </div>
-
+                        <div class="form-group">
+    <label>Income Proof</label>
+    <input type="file" name="income_proof" accept=".pdf,.jpg,.jpeg,.png">
+    <div class="file-hint">PDF or image only — max 5MB</div>
+</div>
+<div class="form-group">
+    <label>ID Proof</label>
+    <input type="file" name="id_proof" accept=".pdf,.jpg,.jpeg,.png">
+    <div class="file-hint">PDF or image only — max 5MB</div>
+</div>
                     <button type="submit" class="auth-btn">Submit Application</button>
                 </form>
             </div>
@@ -212,12 +225,26 @@
     </div>
 
     <script>
-        function selectLoan(type, rate) {
-            document.getElementById('loan-type-select').value = type;
-            document.getElementById('loan-rate').value = rate;
+         function selectLoan(type, rate) {
+    document.getElementById('loan-type-select').value = type;
+    fetchLoanRate(type);
+    calculateEMI();
+    document.querySelector('.loan-form-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+function fetchLoanRate(type) {
+    fetch('/get-loan-rate?type=' + type)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('loan-rate').value = data.min_rate;
             calculateEMI();
-            document.querySelector('.loan-form-card').scrollIntoView({ behavior: 'smooth' });
-        }
+        });
+}
+
+document.getElementById('loan-type-select').addEventListener('change', function() {
+    fetchLoanRate(this.value);
+});    
+    
 
         function calculateEMI() {
             const amount = parseFloat(document.getElementById('loan-amount').value);
@@ -245,6 +272,9 @@
             document.getElementById('principal-val').textContent = principalPct + '%';
             document.getElementById('interest-val').textContent = interestPct + '%';
         }
+        window.addEventListener('load', function() {
+    fetchLoanRate(document.getElementById('loan-type-select').value);
+});
     </script>
 
 </body>
