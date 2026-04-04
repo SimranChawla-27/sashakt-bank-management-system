@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loans - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loans.css') }}">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item active">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" class="nav-item logout">
+                <span class="nav-icon">⏻</span>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>Loans</h1>
+                <p>Apply for loans and track your applications</p>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ user_name[0] }}</div>
+            </div>
+        </div>
+
+        <!-- Loan Types -->
+        <div class="loan-types">
+            <div class="loan-type-card" onclick="selectLoan('Personal', 10.5)">
+                <div class="loan-icon">👤</div>
+                <div class="loan-type-name">Personal Loan</div>
+                <div class="loan-type-rate">From 10.5% p.a.</div>
+                <div class="loan-type-limit">Up to ₹25 Lakhs</div>
+            </div>
+            <div class="loan-type-card" onclick="selectLoan('Home', 8.5)">
+                <div class="loan-icon">🏠</div>
+                <div class="loan-type-name">Home Loan</div>
+                <div class="loan-type-rate">From 8.5% p.a.</div>
+                <div class="loan-type-limit">Up to ₹5 Crores</div>
+            </div>
+            <div class="loan-type-card" onclick="selectLoan('Car', 9.0)">
+                <div class="loan-icon">🚗</div>
+                <div class="loan-type-name">Car Loan</div>
+                <div class="loan-type-rate">From 9.0% p.a.</div>
+                <div class="loan-type-limit">Up to ₹50 Lakhs</div>
+            </div>
+            <div class="loan-type-card" onclick="selectLoan('Education', 8.0)">
+                <div class="loan-icon">📚</div>
+                <div class="loan-type-name">Education Loan</div>
+                <div class="loan-type-rate">From 8.0% p.a.</div>
+                <div class="loan-type-limit">Up to ₹50 Lakhs</div>
+            </div>
+            <div class="loan-type-card" onclick="selectLoan('Gold', 7.5)">
+                <div class="loan-icon">🥇</div>
+                <div class="loan-type-name">Gold Loan</div>
+                <div class="loan-type-rate">From 7.5% p.a.</div>
+                <div class="loan-type-limit">Up to ₹1 Crore</div>
+            </div>
+        </div>
+
+        <div class="loans-grid">
+
+            <!-- Application Form -->
+            <div class="loan-form-card">
+                <h3>Apply for Loan</h3>
+
+                {% if error %}
+                <div class="auth-error">{{ error }}</div>
+                {% endif %}
+
+                {% if success %}
+                <div class="auth-success">{{ success }}</div>
+                {% endif %}
+
+                <form method="POST" action="/loans">
+                    <div class="form-group">
+                        <label>Loan Type</label>
+                        <select name="loan_type" id="loan-type-select">
+                            <option value="Personal">Personal Loan</option>
+                            <option value="Home">Home Loan</option>
+                            <option value="Car">Car Loan</option>
+                            <option value="Education">Education Loan</option>
+                            <option value="Gold">Gold Loan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Loan Amount (₹)</label>
+                        <input type="number" name="amount" id="loan-amount" placeholder="Enter amount" min="10000" oninput="calculateEMI()">
+                    </div>
+                    <div class="form-group">
+                        <label>Tenure (Months)</label>
+                        <input type="number" name="tenure" id="loan-tenure" placeholder="e.g. 24" min="6" max="360" oninput="calculateEMI()">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (% p.a.)</label>
+                        <input type="number" name="interest_rate" id="loan-rate" placeholder="e.g. 10.5" step="0.1" oninput="calculateEMI()">
+                    </div>
+
+                    <!-- EMI Calculator Result -->
+                    <div class="emi-result" id="emi-result" style="display:none">
+                        <div class="emi-row">
+                            <span>Monthly EMI</span>
+                            <span class="emi-value" id="emi-amount">—</span>
+                        </div>
+                        <div class="emi-row">
+                            <span>Total Payment</span>
+                            <span id="total-payment">—</span>
+                        </div>
+                        <div class="emi-row">
+                            <span>Total Interest</span>
+                            <span id="total-interest">—</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="auth-btn">Submit Application</button>
+                </form>
+            </div>
+
+            <!-- Right Side -->
+            <div class="loan-right">
+
+                <!-- EMI Calculator -->
+                <div class="emi-card">
+                    <div class="emi-title">📊 EMI Calculator</div>
+                    <div class="emi-info">Fill the form on the left to see your EMI breakdown instantly.</div>
+                    <div class="emi-breakdown" id="emi-breakdown" style="display:none">
+                        <div class="breakdown-row">
+                            <div class="breakdown-label">Principal</div>
+                            <div class="breakdown-bar-wrap">
+                                <div class="breakdown-bar principal-bar" id="principal-bar"></div>
+                            </div>
+                            <div class="breakdown-value" id="principal-val">—</div>
+                        </div>
+                        <div class="breakdown-row">
+                            <div class="breakdown-label">Interest</div>
+                            <div class="breakdown-bar-wrap">
+                                <div class="breakdown-bar interest-bar" id="interest-bar"></div>
+                            </div>
+                            <div class="breakdown-value" id="interest-val">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Loans -->
+                <div class="my-loans-card">
+                    <div class="emi-title">My Loan Applications</div>
+                    {% for loan in loans %}
+                    <div class="loan-item">
+                        <div class="loan-item-left">
+                            <div class="loan-item-type">{{ loan.loan_type }} Loan</div>
+                            <div class="loan-item-amount">₹{{ "{:,.2f}".format(loan.amount) }}</div>
+                            <div class="loan-item-details">{{ loan.tenure }} months @ {{ loan.interest_rate }}% p.a.</div>
+                        </div>
+                        <div class="loan-status {{ loan.status }}">{{ loan.status.upper() }}</div>
+                    </div>
+                    {% else %}
+                    <div class="no-txn">No loan applications yet</div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectLoan(type, rate) {
+            document.getElementById('loan-type-select').value = type;
+            document.getElementById('loan-rate').value = rate;
+            calculateEMI();
+            document.querySelector('.loan-form-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function calculateEMI() {
+            const amount = parseFloat(document.getElementById('loan-amount').value);
+            const tenure = parseFloat(document.getElementById('loan-tenure').value);
+            const rate = parseFloat(document.getElementById('loan-rate').value);
+
+            if (!amount || !tenure || !rate) return;
+
+            const monthlyRate = rate / 12 / 100;
+            const emi = (amount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) /
+                        (Math.pow(1 + monthlyRate, tenure) - 1);
+            const totalPayment = emi * tenure;
+            const totalInterest = totalPayment - amount;
+
+            document.getElementById('emi-result').style.display = 'block';
+            document.getElementById('emi-breakdown').style.display = 'block';
+            document.getElementById('emi-amount').textContent = '₹' + emi.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('total-payment').textContent = '₹' + totalPayment.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('total-interest').textContent = '₹' + totalInterest.toLocaleString('en-IN', {maximumFractionDigits: 0});
+
+            const principalPct = (amount / totalPayment * 100).toFixed(0);
+            const interestPct = (totalInterest / totalPayment * 100).toFixed(0);
+            document.getElementById('principal-bar').style.width = principalPct + '%';
+            document.getElementById('interest-bar').style.width = interestPct + '%';
+            document.getElementById('principal-val').textContent = principalPct + '%';
+            document.getElementById('interest-val').textContent = interestPct + '%';
+        }
+    </script>
+
+</body>
+</html>

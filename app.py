@@ -354,6 +354,45 @@ def transactions():
         account=account,
         transactions=all_transactions
     )
+@app.route('/loans', methods=['GET', 'POST'])
+def loans():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    user_loans = Loan.query.filter_by(user_id=user.id).order_by(Loan.created_at.desc()).all()
+
+    if request.method == 'POST':
+        loan_type = request.form.get('loan_type')
+        amount = float(request.form.get('amount', 0))
+        tenure = int(request.form.get('tenure', 0))
+        interest_rate = float(request.form.get('interest_rate', 0))
+
+        if amount <= 0 or tenure <= 0 or interest_rate <= 0:
+            return render_template('loans.html',
+                user_name=user.full_name,
+                loans=user_loans,
+                error='Please fill all fields correctly.')
+
+        new_loan = Loan(
+            user_id=user.id,
+            loan_type=loan_type,
+            amount=amount,
+            tenure=tenure,
+            interest_rate=interest_rate,
+            status='pending'
+        )
+        db.session.add(new_loan)
+        db.session.commit()
+
+        return render_template('loans.html',
+            user_name=user.full_name,
+            loans=Loan.query.filter_by(user_id=user.id).order_by(Loan.created_at.desc()).all(),
+            success='Loan application submitted successfully! We will review it shortly.')
+
+    return render_template('loans.html',
+        user_name=user.full_name,
+        loans=user_loans
+    )
 
 @app.route('/logout')
 def logout():
