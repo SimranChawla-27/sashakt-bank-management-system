@@ -1,0 +1,259 @@
+/* NRI Account Type Cards */
+.nri-account-types {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.nri-card {
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.nri-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+.nri-card.nre {
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(124,58,237,0.05));
+    border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+.nri-card.nro {
+    background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(251,191,36,0.05));
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.nri-card.fcnr {
+    background: linear-gradient(135deg, rgba(74,222,128,0.15), rgba(74,222,128,0.05));
+    border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.nri-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.nri-icon { font-size: 28px; }
+
+.nri-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.1);
+    color: #e2e8f0;
+    letter-spacing: 0.5px;
+}
+
+.nri-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 10px;
+}
+
+.nri-card p {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.nri-features {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.nri-feature {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nri-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    color: white;
+    border: none;
+    padding: 11px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.nri-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(124, 58, 237, 0.4);
+}
+
+/* Currency Converter */
+.currency-converter-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 20px;
+    padding: 28px;
+}
+
+.converter-left h3,
+.converter-right h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.converter-left p {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+.converter-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.swap-btn {
+    font-size: 20px;
+    cursor: pointer;
+    padding: 10px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    transition: all 0.2s;
+    margin-bottom: 18px;
+    flex-shrink: 0;
+}
+
+.swap-btn:hover {
+    background: rgba(139, 92, 246, 0.2);
+    transform: rotate(180deg);
+}
+
+.converter-result {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    text-align: center;
+}
+
+.result-amount {
+    font-size: 28px;
+    font-weight: 800;
+    color: #fbbf24;
+    margin-bottom: 6px;
+}
+
+.result-rate {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Rate Table */
+.rate-table {
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 16px;
+}
+
+.rate-table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: 10px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+}
+
+.rate-table-row:last-child { border-bottom: none; }
+
+.rate-table-row.header {
+    background: rgba(139, 92, 246, 0.1);
+    font-size: 11px;
+    font-weight: 600;
+    color: #a78bfa;
+    letter-spacing: 0.5px;
+}
+
+.rate-table-row span:first-child { color: #e2e8f0; }
+.rate-table-row span:nth-child(2) { color: #4ade80; font-weight: 600; }
+.rate-table-row span:nth-child(3) { color: #f87171; font-weight: 600; }
+
+/* Enquiry Form */
+.nri-enquiry-section {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 20px;
+    padding: 28px;
+}
+
+.nri-enquiry-section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.nri-enquiry-section p {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+.enquiry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.enquiry-success-screen {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.enquiry-success-screen .success-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: white;
+    margin: 0 auto 20px;
+}
+
+.enquiry-success-screen h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4ade80;
+    margin-bottom: 10px;
+}
+
+.enquiry-success-screen p {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 25px;
+}

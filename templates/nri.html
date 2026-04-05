@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRI Banking - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nri.css') }}">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item active">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            {% if user_name == 'Guest' %}
+            <a href="/login" class="nav-item" style="color:#4ade80">
+                <span class="nav-icon">→</span>
+                <span>Login</span>
+            </a>
+            {% else %}
+            <a href="/logout" class="nav-item logout">
+                <span class="nav-icon">⏻</span>
+                <span>Logout</span>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>NRI Banking</h1>
+                <p>Seamless banking solutions for Non-Resident Indians worldwide</p>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ user_name[0] }}</div>
+            </div>
+        </div>
+
+        <!-- Account Types -->
+        <div class="nri-account-types">
+            <div class="nri-card nre">
+                <div class="nri-card-top">
+                    <div class="nri-icon">🏦</div>
+                    <div class="nri-badge">NRE Account</div>
+                </div>
+                <h3>Non-Resident External</h3>
+                <p>For parking your foreign earnings in India. Fully repatriable — send money back abroad anytime.</p>
+                <div class="nri-features">
+                    <div class="nri-feature">✦ Tax free interest in India</div>
+                    <div class="nri-feature">✦ Fully repatriable principal and interest</div>
+                    <div class="nri-feature">✦ Joint account with NRI allowed</div>
+                    <div class="nri-feature">✦ Interest rate up to 7.5% p.a.</div>
+                </div>
+                <button class="nri-btn" onclick="scrollToEnquiry('NRE')">Enquire Now</button>
+            </div>
+
+            <div class="nri-card nro">
+                <div class="nri-card-top">
+                    <div class="nri-icon">💰</div>
+                    <div class="nri-badge">NRO Account</div>
+                </div>
+                <h3>Non-Resident Ordinary</h3>
+                <p>For managing income earned in India — rent, dividends, pension. Partially repatriable up to $1 million per year.</p>
+                <div class="nri-features">
+                    <div class="nri-feature">✦ Manage India income easily</div>
+                    <div class="nri-feature">✦ Joint account with resident Indian</div>
+                    <div class="nri-feature">✦ TDS applicable on interest</div>
+                    <div class="nri-feature">✦ Interest rate up to 7.0% p.a.</div>
+                </div>
+                <button class="nri-btn" onclick="scrollToEnquiry('NRO')">Enquire Now</button>
+            </div>
+
+            <div class="nri-card fcnr">
+                <div class="nri-card-top">
+                    <div class="nri-icon">🌍</div>
+                    <div class="nri-badge">FCNR Account</div>
+                </div>
+                <h3>Foreign Currency Non-Resident</h3>
+                <p>Fixed deposit in foreign currency — USD, GBP, EUR. No exchange rate risk as deposit stays in your currency.</p>
+                <div class="nri-features">
+                    <div class="nri-feature">✦ No currency conversion risk</div>
+                    <div class="nri-feature">✦ Available in USD, GBP, EUR, JPY</div>
+                    <div class="nri-feature">✦ Fully repatriable</div>
+                    <div class="nri-feature">✦ Tenure 1 to 5 years</div>
+                </div>
+                <button class="nri-btn" onclick="scrollToEnquiry('FCNR')">Enquire Now</button>
+            </div>
+        </div>
+
+        <!-- Currency Converter -->
+        <div class="currency-converter-section">
+            <div class="converter-left">
+                <h3>🔄 Live Currency Converter</h3>
+                <p>Convert between major currencies using live exchange rates</p>
+                <div class="converter-form">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" id="conv-amount" placeholder="Enter amount" value="1000" oninput="convertCurrency()">
+                    </div>
+                    <div class="converter-row">
+                        <div class="form-group">
+                            <label>From</label>
+                            <select id="conv-from" onchange="convertCurrency()">
+                                <option value="USD">USD — US Dollar</option>
+                                <option value="EUR">EUR — Euro</option>
+                                <option value="GBP">GBP — British Pound</option>
+                                <option value="JPY">JPY — Japanese Yen</option>
+                                <option value="SGD">SGD — Singapore Dollar</option>
+                                <option value="INR">INR — Indian Rupee</option>
+                            </select>
+                        </div>
+                        <div class="swap-btn" onclick="swapCurrencies()">⇄</div>
+                        <div class="form-group">
+                            <label>To</label>
+                            <select id="conv-to" onchange="convertCurrency()">
+                                <option value="INR" selected>INR — Indian Rupee</option>
+                                <option value="USD">USD — US Dollar</option>
+                                <option value="EUR">EUR — Euro</option>
+                                <option value="GBP">GBP — British Pound</option>
+                                <option value="JPY">JPY — Japanese Yen</option>
+                                <option value="SGD">SGD — Singapore Dollar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="converter-result" id="converter-result">
+                        <div class="result-amount" id="result-amount">—</div>
+                        <div class="result-rate" id="result-rate">Enter amount to convert</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="converter-right">
+                <h3>📊 Quick Rate Reference</h3>
+                <div class="rate-table" id="rate-table">
+                    <div class="rate-table-row header">
+                        <span>Currency</span>
+                        <span>Buy (INR)</span>
+                        <span>Sell (INR)</span>
+                    </div>
+                    <div class="rate-table-row">
+                        <span>🇺🇸 USD</span>
+                        <span id="usd-buy">Loading...</span>
+                        <span id="usd-sell">—</span>
+                    </div>
+                    <div class="rate-table-row">
+                        <span>🇪🇺 EUR</span>
+                        <span id="eur-buy">Loading...</span>
+                        <span id="eur-sell">—</span>
+                    </div>
+                    <div class="rate-table-row">
+                        <span>🇬🇧 GBP</span>
+                        <span id="gbp-buy">Loading...</span>
+                        <span id="gbp-sell">—</span>
+                    </div>
+                    <div class="rate-table-row">
+                        <span>🇸🇬 SGD</span>
+                        <span id="sgd-buy">Loading...</span>
+                        <span id="sgd-sell">—</span>
+                    </div>
+                    <div class="rate-table-row">
+                        <span>🇯🇵 JPY</span>
+                        <span id="jpy-buy">Loading...</span>
+                        <span id="jpy-sell">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enquiry Form -->
+        <div class="nri-enquiry-section" id="enquiry-section">
+    <h3>📋 NRI Account Enquiry</h3>
+    <p>Fill in your details and our NRI banking specialist will contact you within 24 hours</p>
+
+    {% if enquiry_success %}
+    <div class="enquiry-success-screen">
+        <div class="success-icon">✓</div>
+        <h3>Enquiry Submitted!</h3>
+        <p>{{ enquiry_success }}</p>
+        <button class="nri-btn" style="max-width:200px;margin:0 auto" onclick="window.location='/nri'">Submit Another</button>
+    </div>
+
+    {% elif enquiry_error %}
+    <div class="auth-error">{{ enquiry_error }}</div>
+    <form method="POST" action="/nri" class="enquiry-form">
+        <div class="enquiry-grid">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="full_name" placeholder="Your full name" required
+                       value="{{ user_name if user_name != 'Guest' else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="+1 234 567 8900" required>
+            </div>
+            <div class="form-group">
+                <label>Country of Residence</label>
+                <select name="country">
+                    <option value="">Select your country</option>
+                    <option>United States</option>
+                    <option>United Kingdom</option>
+                    <option>Canada</option>
+                    <option>Australia</option>
+                    <option>Singapore</option>
+                    <option>UAE</option>
+                    <option>Germany</option>
+                    <option>Japan</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Account Type Interested In</label>
+                <select name="account_type" id="enquiry-account-type">
+                    <option value="NRE">NRE Account</option>
+                    <option value="NRO">NRO Account</option>
+                    <option value="FCNR">FCNR Account</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Message (Optional)</label>
+                <input type="text" name="message" placeholder="Any specific requirements...">
+            </div>
+        </div>
+        <button type="submit" class="auth-btn" style="max-width:300px">Submit Enquiry</button>
+    </form>
+
+    {% else %}
+    <form method="POST" action="/nri" class="enquiry-form">
+        <div class="enquiry-grid">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="full_name" placeholder="Your full name" required
+                       value="{{ user_name if user_name != 'Guest' else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="+1 234 567 8900" required>
+            </div>
+            <div class="form-group">
+                <label>Country of Residence</label>
+                <select name="country">
+                    <option value="">Select your country</option>
+                    <option>United States</option>
+                    <option>United Kingdom</option>
+                    <option>Canada</option>
+                    <option>Australia</option>
+                    <option>Singapore</option>
+                    <option>UAE</option>
+                    <option>Germany</option>
+                    <option>Japan</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Account Type Interested In</label>
+                <select name="account_type" id="enquiry-account-type">
+                    <option value="NRE">NRE Account</option>
+                    <option value="NRO">NRO Account</option>
+                    <option value="FCNR">FCNR Account</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Message (Optional)</label>
+                <input type="text" name="message" placeholder="Any specific requirements...">
+            </div>
+        </div>
+        <button type="submit" class="auth-btn" style="max-width:300px">Submit Enquiry</button>
+    </form>
+    {% endif %}
+</div>
+
+    <script>
+        let liveRates = {};
+
+        fetch('/currency-rates', { cache: 'no-store' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' || data.status === 'fallback') {
+                    liveRates = data.rates;
+                    const spread = 0.5;
+                    document.getElementById('usd-buy').textContent = '₹' + data.rates.USD;
+                    document.getElementById('usd-sell').textContent = '₹' + (data.rates.USD + spread).toFixed(2);
+                    document.getElementById('eur-buy').textContent = '₹' + data.rates.EUR;
+                    document.getElementById('eur-sell').textContent = '₹' + (data.rates.EUR + spread).toFixed(2);
+                    document.getElementById('gbp-buy').textContent = '₹' + data.rates.GBP;
+                    document.getElementById('gbp-sell').textContent = '₹' + (data.rates.GBP + spread).toFixed(2);
+                    document.getElementById('sgd-buy').textContent = '₹' + data.rates.SGD;
+                    document.getElementById('sgd-sell').textContent = '₹' + (data.rates.SGD + spread).toFixed(2);
+                    document.getElementById('jpy-buy').textContent = '₹' + data.rates.JPY;
+                    document.getElementById('jpy-sell').textContent = '₹' + (data.rates.JPY + spread).toFixed(2);
+                    convertCurrency();
+                }
+            });
+
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('conv-amount').value);
+            const from = document.getElementById('conv-from').value;
+            const to = document.getElementById('conv-to').value;
+            if (!amount || !liveRates.USD) return;
+
+            const toINR = { USD: liveRates.USD, EUR: liveRates.EUR, GBP: liveRates.GBP, JPY: liveRates.JPY, SGD: liveRates.SGD, INR: 1 };
+            const fromRate = toINR[from] || 1;
+            const toRate = toINR[to] || 1;
+            const result = (amount * fromRate) / toRate;
+
+            document.getElementById('result-amount').textContent = result.toLocaleString('en-IN', { maximumFractionDigits: 2 }) + ' ' + to;
+            document.getElementById('result-rate').textContent = `1 ${from} = ${(fromRate/toRate).toFixed(4)} ${to}`;
+        }
+
+        function swapCurrencies() {
+            const from = document.getElementById('conv-from');
+            const to = document.getElementById('conv-to');
+            const temp = from.value;
+            from.value = to.value;
+            to.value = temp;
+            convertCurrency();
+        }
+
+       function scrollToEnquiry(type) {
+            document.getElementById('enquiry-account-type').value = type;
+            document.getElementById('enquiry-section').scrollIntoView({ behavior: 'smooth' });
+            
+        }
+    </script>
+
+</body>
+</html>

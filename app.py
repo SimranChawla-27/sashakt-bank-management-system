@@ -138,6 +138,17 @@ class Loan(db.Model):
     income_proof = db.Column(db.String(200))
     id_proof = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, server_default=db.func.now())    
+class NriEnquiry(db.Model):
+    __tablename__ = 'nri_enquiries'
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(15), nullable=False)
+    country = db.Column(db.String(100), nullable=False)
+    account_type = db.Column(db.String(20), nullable=False)
+    message = db.Column(db.Text)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, server_default=db.func.now())    
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -574,12 +585,45 @@ def gold_rate():
     except:
         return jsonify({'rate': 7145, 'status': 'fallback'})
 
-@app.route('/nri')
+@app.route('/nri', methods=['GET', 'POST'])
 def nri():
     user_name = 'Guest'
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
         user_name = user.full_name
+
+    enquiry_success = None
+    enquiry_error = None
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        account_type = request.form.get('account_type')
+
+        existing = NriEnquiry.query.filter_by(
+            email=email,
+            account_type=account_type
+        ).first()
+
+        if existing:
+            enquiry_error = f'You have already submitted an enquiry for {account_type} account. Our team will contact you soon.'
+        else:
+            enquiry = NriEnquiry(
+                full_name=request.form.get('full_name'),
+                email=email,
+                phone=request.form.get('phone'),
+                country=request.form.get('country'),
+                account_type=account_type,
+                message=request.form.get('message')
+            )
+            db.session.add(enquiry)
+            db.session.commit()
+            enquiry_success = 'Thank you! Our NRI banking specialist will contact you within 24 hours.'
+
+    return render_template('nri.html',
+        user_name=user_name,
+        enquiry_success=enquiry_success,
+        enquiry_error=enquiry_error
+    )
 @app.route('/logout')
 def logout():
     session.clear()
