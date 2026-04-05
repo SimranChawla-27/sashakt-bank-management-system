@@ -558,6 +558,56 @@ def schemes():
         user_name=user_name,
         applied_schemes=applied_schemes
     )
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    accounts = Account.query.filter_by(user_id=user.id).all()
+    return render_template('profile.html',
+        user=user,
+        accounts=accounts,
+        update_success=request.args.get('update_success'),
+        update_error=request.args.get('update_error'),
+        password_success=request.args.get('password_success'),
+        password_error=request.args.get('password_error')
+    )
+
+@app.route('/profile/update', methods=['POST'])
+def profile_update():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    email = request.form.get('email')
+    existing = User.query.filter_by(email=email).first()
+    if existing and existing.id != user.id:
+        return redirect(url_for('profile', update_error='Email already in use by another account.'))
+    user.full_name = request.form.get('full_name')
+    user.email = email
+    user.phone = request.form.get('phone')
+    user.address = request.form.get('address')
+    db.session.commit()
+    session['user_name'] = user.full_name
+    session['user_email'] = user.email
+    return redirect(url_for('profile', update_success='Profile updated successfully.'))
+
+@app.route('/profile/change-password', methods=['POST'])
+def change_password():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    current = request.form.get('current_password')
+    new_pass = request.form.get('new_password')
+    confirm = request.form.get('confirm_password')
+    if not bcrypt.checkpw(current.encode('utf-8'), user.password.encode('utf-8')):
+        return redirect(url_for('profile', password_error='Current password is incorrect.'))
+    if new_pass != confirm:
+        return redirect(url_for('profile', password_error='New passwords do not match.'))
+    if len(new_pass) < 8:
+        return redirect(url_for('profile', password_error='Password must be at least 8 characters.'))
+    user.password = bcrypt.hashpw(new_pass.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    db.session.commit()
+    return redirect(url_for('profile', password_success='Password changed successfully.'))
 @app.route('/rates')
 def rates():
     user_name = 'Guest'

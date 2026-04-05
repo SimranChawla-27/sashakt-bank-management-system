@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Sashakt Bank</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⊞</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/transfer" class="nav-item">
+                <span class="nav-icon">↔</span>
+                <span>Transfer Money</span>
+            </a>
+            <a href="/transactions" class="nav-item">
+                <span class="nav-icon">☰</span>
+                <span>Transactions</span>
+            </a>
+            <a href="/loans" class="nav-item">
+                <span class="nav-icon">🏦</span>
+                <span>Loans</span>
+            </a>
+            <a href="/credit-card" class="nav-item">
+                <span class="nav-icon">💳</span>
+                <span>Credit Card</span>
+            </a>
+            <a href="/schemes" class="nav-item">
+                <span class="nav-icon">🏛</span>
+                <span>Schemes</span>
+            </a>
+            <a href="/rates" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Rates</span>
+            </a>
+            <a href="/nri" class="nav-item">
+                <span class="nav-icon">🌍</span>
+                <span>NRI Banking</span>
+            </a>
+            <a href="/profile" class="nav-item active">
+                <span class="nav-icon">👤</span>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" class="nav-item logout">
+                <span class="nav-icon">⏻</span>
+                <span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <div class="topbar">
+            <div class="topbar-left">
+                <h1>My Profile</h1>
+                <p>Manage your personal details and account settings</p>
+            </div>
+            <div class="topbar-right">
+                <div class="user-avatar">{{ user.full_name[0] }}</div>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+
+            <!-- Left Side - Profile Card -->
+            <div class="profile-left">
+
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-avatar-large">{{ user.full_name[0] }}</div>
+                    <div class="profile-name">{{ user.full_name }}</div>
+                    <div class="profile-email">{{ user.email }}</div>
+                    <div class="profile-since">Member since {{ user.created_at.strftime('%B %Y') }}</div>
+                    <div class="profile-status active">● Active Account</div>
+                </div>
+
+                <!-- Account Cards -->
+                <div class="profile-accounts">
+                    <div class="profile-section-title">Linked Accounts</div>
+                    {% for account in accounts %}
+                    <div class="profile-account-item">
+                        <div class="profile-account-left">
+                            <div class="profile-account-type">{{ account.account_type }}</div>
+                            <div class="profile-account-number">{{ account.account_number }}</div>
+                        </div>
+                        <div class="profile-account-balance">₹{{ "{:,.2f}".format(account.balance) }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <!-- Right Side - Edit Forms -->
+            <div class="profile-right">
+
+                <!-- Tab Switcher -->
+                <div class="profile-tabs">
+                    <button class="profile-tab active" onclick="showProfileTab('details')">Personal Details</button>
+                    <button class="profile-tab" onclick="showProfileTab('password')">Change Password</button>
+                    <button class="profile-tab" onclick="showProfileTab('notifications')">Notifications</button>
+                </div>
+
+                <!-- Personal Details Tab -->
+                <div id="details-tab" class="profile-tab-content">
+
+                    {% if update_success %}
+                    <div class="auth-success">{{ update_success }}</div>
+                    {% endif %}
+
+                    {% if update_error %}
+                    <div class="auth-error">{{ update_error }}</div>
+                    {% endif %}
+
+                    <form method="POST" action="/profile/update">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" name="full_name" value="{{ user.full_name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" name="email" value="{{ user.email }}" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" name="phone" value="{{ user.phone }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Aadhaar Number</label>
+                                <input type="text" name="aadhaar" value="{{ user.aadhaar }}" readonly
+                                       style="opacity:0.6;cursor:not-allowed">
+                                <div class="file-hint">Aadhaar cannot be changed. Contact branch.</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" name="address" value="{{ user.address }}" required>
+                        </div>
+                        <button type="submit" class="auth-btn">Save Changes</button>
+                    </form>
+                </div>
+
+                <!-- Change Password Tab -->
+                <div id="password-tab" class="profile-tab-content" style="display:none">
+
+                    {% if password_success %}
+                    <div class="auth-success">{{ password_success }}</div>
+                    {% endif %}
+
+                    {% if password_error %}
+                    <div class="auth-error">{{ password_error }}</div>
+                    {% endif %}
+
+                    <form method="POST" action="/profile/change-password">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input type="password" name="current_password" placeholder="Enter current password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" name="new_password" placeholder="Min 8 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" name="confirm_password" placeholder="Repeat new password" required>
+                        </div>
+                        <button type="submit" class="auth-btn">Change Password</button>
+                    </form>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div id="notifications-tab" class="profile-tab-content" style="display:none">
+                    <div class="notif-settings">
+                        <div class="notif-setting-item">
+                            <div class="notif-setting-info">
+                                <div class="notif-setting-title">Transaction Alerts</div>
+                                <div class="notif-setting-desc">Get notified for every debit and credit</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="notif-setting-item">
+                            <div class="notif-setting-info">
+                                <div class="notif-setting-title">Loan Status Updates</div>
+                                <div class="notif-setting-desc">Get notified when loan status changes</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="notif-setting-item">
+                            <div class="notif-setting-info">
+                                <div class="notif-setting-title">Scheme Updates</div>
+                                <div class="notif-setting-desc">Get notified about new schemes</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="notif-setting-item">
+                            <div class="notif-setting-info">
+                                <div class="notif-setting-title">Rate Changes</div>
+                                <div class="notif-setting-desc">Get notified when interest rates change</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <button class="auth-btn" style="margin-top:20px">Save Preferences</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showProfileTab(tab) {
+            document.getElementById('details-tab').style.display = tab === 'details' ? 'block' : 'none';
+            document.getElementById('password-tab').style.display = tab === 'password' ? 'block' : 'none';
+            document.getElementById('notifications-tab').style.display = tab === 'notifications' ? 'block' : 'none';
+            document.querySelectorAll('.profile-tab').forEach((t, i) => {
+                t.classList.toggle('active',
+                    (tab === 'details' && i === 0) ||
+                    (tab === 'password' && i === 1) ||
+                    (tab === 'notifications' && i === 2)
+                );
+            });
+        }
+
+        // Show correct tab if there is a message
+       window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('password_error') || urlParams.get('password_success')) {
+        showProfileTab('password');
+    }
+});
+    </script>
+
+</body>
+</html>
