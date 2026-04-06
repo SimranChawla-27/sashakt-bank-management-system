@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teller Dashboard - Sashakt Bank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/employee.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar -->
+    <div class="emp-sidebar">
+        <div class="emp-sidebar-logo">
+            <img src="{{ url_for('static', filename='images/Sashakt_logo.png') }}" alt="Logo">
+            <span>Staff Portal</span>
+        </div>
+        <div class="emp-role-badge">
+            <div class="emp-role-name">{{ emp_name }}</div>
+            <div class="emp-role-dept">Teller — Operations</div>
+        </div>
+        <nav class="emp-nav">
+            <a href="/employee/teller" class="emp-nav-item active">
+                <span>⊞</span><span>Dashboard</span>
+            </a>
+            <a href="#" onclick="document.getElementById('customer-search').focus();document.querySelector('.emp-table-card').scrollIntoView({behavior:'smooth'})" class="emp-nav-item">
+    <span>🔍</span><span>Search Customer</span>
+</a>
+            <a href="/employee/teller/transactions" class="emp-nav-item">
+                <span>☰</span><span>My Transactions</span>
+            </a>
+            <a href="/employee/logout" class="emp-nav-item logout">
+                <span>⏻</span><span>Logout</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="emp-main">
+        <div class="emp-topbar">
+            <div>
+                <h1>Teller Dashboard</h1>
+                <p>Welcome back, {{ emp_name }} — {{ current_date }}</p>
+            </div>
+            <div class="emp-avatar">{{ emp_name[0] }}</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="emp-stats">
+            <div class="emp-stat-card">
+                <div class="emp-stat-value">{{ total_customers }}</div>
+                <div class="emp-stat-label">Total Customers</div>
+            </div>
+            <div class="emp-stat-card">
+                <div class="emp-stat-value">{{ total_accounts }}</div>
+                <div class="emp-stat-label">Total Accounts</div>
+            </div>
+            <div class="emp-stat-card">
+                <div class="emp-stat-value">{{ today_transactions }}</div>
+                <div class="emp-stat-label">Today's Transactions</div>
+            </div>
+            <div class="emp-stat-card">
+                <div class="emp-stat-value">{{ pending_tickets }}</div>
+                <div class="emp-stat-label">Pending Tickets</div>
+            </div>
+        </div>
+
+        <!-- Customer Search -->
+        <div class="emp-table-card">
+            <div class="emp-table-header">
+                <div class="emp-table-title">🔍 Search Customer</div>
+            </div>
+            <div style="padding:20px">
+                <div style="display:flex;gap:12px;margin-bottom:20px">
+                    <input type="text" class="emp-search" id="customer-search"
+                        placeholder="Enter account number..." style="width:300px">
+                    <button class="emp-btn view" onclick="searchCustomer()" style="padding:9px 20px;font-size:13px">Search</button>
+                </div>
+
+                <div id="customer-result" style="display:none">
+                    <div class="customer-info-card">
+                        <div class="customer-info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Customer Name</div>
+                                <div class="info-value" id="cust-name">—</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Account Number</div>
+                                <div class="info-value" id="cust-acc">—</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Account Type</div>
+                                <div class="info-value" id="cust-type">—</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Current Balance</div>
+                                <div class="info-value green" id="cust-balance">—</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Account Status</div>
+                                <div class="info-value" id="cust-status">—</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Phone</div>
+                                <div class="info-value" id="cust-phone">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Form -->
+                        <div class="teller-txn-form">
+                            <div class="teller-txn-title">Process Transaction</div>
+                            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+                                <div class="form-group" style="margin:0;flex:1">
+                                    <label>Transaction Type</label>
+                                    <select id="txn-type">
+                                        <option value="deposit">Cash Deposit</option>
+                                        <option value="withdrawal">Cash Withdrawal</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin:0;flex:1">
+                                    <label>Amount (₹)</label>
+                                    <input type="number" id="txn-amount" placeholder="Enter amount" min="1">
+                                </div>
+                                <div class="form-group" style="margin:0;flex:1">
+                                    <label>Description</label>
+                                    <input type="text" id="txn-desc" placeholder="Optional note">
+                                </div>
+                                <button class="emp-btn approve" onclick="processTransaction()"
+                                    style="padding:10px 20px;font-size:13px;margin-bottom:18px">Process</button>
+                            </div>
+                            <div id="txn-result" style="display:none;margin-top:10px"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="customer-not-found" style="display:none;color:#f87171;font-size:13px;padding:10px">
+                    No customer found with this account number.
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="emp-table-card">
+            <div class="emp-table-header">
+                <div class="emp-table-title">Recent Transactions</div>
+            </div>
+            <table class="emp-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>From Account</th>
+                        <th>To Account</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in recent_transactions %}
+                    <tr>
+                        <td>{{ txn.created_at.strftime('%d %b %Y %I:%M %p') }}</td>
+                        <td>{{ txn.from_account }}</td>
+                        <td>{{ txn.to_account }}</td>
+                        <td><span class="status-badge {{ txn.transaction_type }}">{{ txn.transaction_type }}</span></td>
+                        <td style="color:#fbbf24;font-weight:600">₹{{ "{:,.2f}".format(txn.amount) }}</td>
+                        <td>{{ txn.description or '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" style="text-align:center;padding:30px;color:#64748b">No transactions yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let currentAccount = null;
+
+        function searchCustomer() {
+            const accNum = document.getElementById('customer-search').value.trim();
+            if (!accNum) return;
+
+            fetch('/employee/search-customer?account=' + accNum)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.found) {
+                        currentAccount = data;
+                        document.getElementById('cust-name').textContent = data.name;
+                        document.getElementById('cust-acc').textContent = data.account_number;
+                        document.getElementById('cust-type').textContent = data.account_type;
+                        document.getElementById('cust-balance').textContent = '₹' + parseFloat(data.balance).toLocaleString('en-IN', {minimumFractionDigits: 2});
+                        document.getElementById('cust-status').textContent = data.status.toUpperCase();
+                        document.getElementById('cust-phone').textContent = data.phone;
+                        document.getElementById('customer-result').style.display = 'block';
+                        document.getElementById('customer-not-found').style.display = 'none';
+                    } else {
+                        document.getElementById('customer-result').style.display = 'none';
+                        document.getElementById('customer-not-found').style.display = 'block';
+                    }
+                });
+        }
+
+        function processTransaction() {
+            if (!currentAccount) return;
+            const type = document.getElementById('txn-type').value;
+            const amount = document.getElementById('txn-amount').value;
+            const desc = document.getElementById('txn-desc').value;
+
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            fetch('/employee/process-transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    account_number: currentAccount.account_number,
+                    type: type,
+                    amount: amount,
+                    description: desc
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const result = document.getElementById('txn-result');
+                result.style.display = 'block';
+                if (data.success) {
+                    result.style.color = '#4ade80';
+                    result.textContent = '✓ ' + data.message;
+                    document.getElementById('cust-balance').textContent = '₹' + parseFloat(data.new_balance).toLocaleString('en-IN', {minimumFractionDigits: 2});
+                } else {
+                    result.style.color = '#f87171';
+                    result.textContent = '✗ ' + data.message;
+                }
+            });
+        }
+
+        document.getElementById('customer-search').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchCustomer();
+        });
+    </script>
+
+</body>
+</html>

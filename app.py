@@ -720,7 +720,168 @@ def get_loan_rate():
     if rate:
         return jsonify({'min_rate': rate.min_rate, 'max_rate': rate.max_rate})
     return jsonify({'min_rate': 10.5, 'max_rate': 18.0})
+@app.route('/employee-portal')
+def employee_portal():
+    return render_template('employee_login.html')
 
+@app.route('/employee/login', methods=['POST'])
+def employee_login():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    employee = Employee.query.filter_by(email=email).first()
+    if not employee:
+        return render_template('employee_login.html', error='No employee found with this email.')
+    if not bcrypt.checkpw(password.encode('utf-8'), employee.password.encode('utf-8')):
+        return render_template('employee_login.html', error='Incorrect password.')
+    if not employee.is_active:
+        return render_template('employee_login.html', error='Your account has been deactivated.')
+    session['emp_id'] = employee.id
+    session['emp_name'] = employee.full_name
+    session['emp_role'] = employee.role
+    session['emp_dept'] = employee.department
+    if employee.role == 'teller':
+       return redirect('/employee/teller')
+    elif employee.role == 'manager':
+       return redirect('/employee/manager')
+    elif employee.role == 'hr':
+        return redirect('/employee/hr')
+    return redirect(url_for('employee_portal'))
+@app.route('/employee/teller')
+def teller_dashboard():
+    if 'emp_id' not in session or session.get('emp_role') != 'teller':
+        return redirect('/employee-portal')
+    total_customers = User.query.count()
+    total_accounts = Account.query.count()
+    today = datetime.now().date()
+    today_transactions = Transaction.query.filter(
+        db.func.date(Transaction.created_at) == today
+    ).count()
+    pending_tickets = SupportTicket.query.filter_by(status='open').count()
+    recent_transactions = Transaction.query.order_by(
+        Transaction.created_at.desc()
+    ).limit(10).all()
+    return render_template('teller_dashboard.html',
+        emp_name=session['emp_name'],
+        current_date=datetime.now().strftime('%A, %d %B %Y'),
+        total_customers=total_customers,
+        total_accounts=total_accounts,
+        today_transactions=today_transactions,
+        pending_tickets=pending_tickets,
+        recent_transactions=recent_transactions
+    )
+
+@app.route('/employee/search-customer')
+def search_customer():
+    if 'emp_id' not in session:
+        return jsonify({'found': False})
+    account_number = request.args.get('account')
+    account = Account.query.filter_by(account_number=account_number).first()
+    if account:
+        user = User.query.get(account.user_id)
+        return jsonify({
+            'found': True,
+            'name': user.full_name,
+            'account_number': account.account_number,
+            'account_type': account.account_type,
+            'balance': account.balance,
+            'status': account.status,
+            'phone': user.phone
+        })
+    return jsonify({'found': False})
+
+@app.route('/employee/process-transaction', methods=['POST'])
+def process_transaction():
+    if 'emp_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'})
+    data = request.get_json()
+    account_number = data.get('account_number')
+    txn_type = data.get('type')
+    amount = float(data.get('amount', 0))
+    description = data.get('description', '')
+    account = Account.query.filter_by(account_number=account_number).first()
+    if not account:
+        return jsonify({'success': False, 'message': 'Account not found'})
+    if amount <= 0:
+        return jsonify({'success': False, 'message': 'Invalid amount'})
+    if txn_type == 'withdrawal' and account.balance < amount:
+        return jsonify({'success': False, 'message': f'Insufficient balance. Available: ₹{account.balance:,.2f}'})
+    if txn_type == 'deposit':
+        account.balance += amount
+        txn = Transaction(
+            from_account='CASH',
+            to_account=account_number,
+            amount=amount,
+            transaction_type='deposit',
+            description=description or 'Cash deposit by teller'
+        )
+    else:
+        account.balance -= amount
+        txn = Transaction(
+            from_account=account_number,
+            to_account='CASH',
+            amount=amount,
+            transaction_type='withdrawal',
+            description=description or 'Cash withdrawal by teller'
+        )
+    db.session.add(txn)
+    db.session.commit()
+    return jsonify({
+        'success': True,
+        'message': f'₹{amount:,.2f} {txn_type} processed successfully',
+        'new_balance': account.balance
+    })
+@app.route('/employee/teller/transactions')
+def teller_transactions():
+    if 'emp_id' not in session or session.get('emp_role') != 'teller':
+        return redirect('/employee-portal')
+
+    transactions = Transaction.query.filter(
+        (Transaction.from_account == 'CASH') |
+        (Transaction.to_account == 'CASH')
+    ).order_by(Transaction.created_at.desc()).all()
+
+    today = datetime.now().date()
+    today_processed = Transaction.query.filter(
+        ((Transaction.from_account == 'CASH') |
+        (Transaction.to_account == 'CASH')) &
+        (db.func.date(Transaction.created_at) == today)
+    ).count()
+
+    total_deposit = db.session.query(
+        db.func.sum(Transaction.amount)
+    ).filter(
+        Transaction.from_account == 'CASH'
+    ).scalar() or 0
+
+    total_withdrawal = db.session.query(
+        db.func.sum(Transaction.amount)
+    ).filter(
+        Transaction.to_account == 'CASH'
+    ).scalar() or 0
+
+    all_accounts = Account.query.all()
+    accounts_map = {acc.account_number: acc for acc in all_accounts}
+
+    for acc in all_accounts:
+        acc.user = User.query.get(acc.user_id)
+
+    return render_template('teller_transactions.html',
+        emp_name=session['emp_name'],
+        transactions=transactions,
+        accounts_map=accounts_map,
+        total_processed=len(transactions),
+        today_processed=today_processed,
+        total_deposit=total_deposit,
+        total_withdrawal=total_withdrawal
+    )
+
+@app.route('/employee/logout')
+def employee_logout():
+    session.pop('emp_id', None)
+    session.pop('emp_name', None)
+    session.pop('emp_role', None)
+    session.pop('emp_dept', None)
+    return redirect(url_for('employee_portal'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=3000)
